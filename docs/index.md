@@ -13,7 +13,7 @@ hero:
       link: /intro
     - theme: alt
       text: View on GitHub
-      link: https://github.com/stacksjs/vidx
+      link: https://github.com/stacksjs/ts-videos
 
 features:
   - title: "Smart Reverse Proxy"

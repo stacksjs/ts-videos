@@ -1,8 +1,8 @@
 import type { vidxOptions } from '../src/types'
-import { CAC } from 'cac'
+import { CLI } from '@stacksjs/clapp'
 import { version } from '../../../package.json'
 
-const cli = new CAC('vidx')
+const cli = new CLI('vidx')
 
 cli
   .command('[path]', 'Start the Reverse Proxy Server')

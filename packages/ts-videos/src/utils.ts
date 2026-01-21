@@ -7,7 +7,7 @@ export function debugLog(category: string, message: string, verbose?: boolean | 
 
   if (verbose === true || config.verbose === true) {
     // eslint-disable-next-line no-console
-    console.debug(`[imgx:${category}] ${message}`)
+    console.debug(`[ts-videos:${category}] ${message}`)
   }
 
   if (Array.isArray(verbose)) {
@@ -15,7 +15,7 @@ export function debugLog(category: string, message: string, verbose?: boolean | 
     const matches = verbose.some(prefix => category.startsWith(prefix))
     if (matches) {
       // eslint-disable-next-line no-console
-      console.log(`[imgx:${category}] ${message}`)
+      console.log(`[ts-videos:${category}] ${message}`)
     }
   }
 
@@ -24,7 +24,7 @@ export function debugLog(category: string, message: string, verbose?: boolean | 
     const matches = config.verbose.some(prefix => category.startsWith(prefix))
     if (matches) {
       // eslint-disable-next-line no-console
-      console.log(`[imgx:${category}] ${message}`)
+      console.log(`[ts-videos:${category}] ${message}`)
     }
   }
 }

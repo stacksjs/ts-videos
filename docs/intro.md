@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/stacksjs/vidx/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
+<p align="center"><img src="https://github.com/stacksjs/ts-videos/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
 
 # A Better Developer Experience
 
@@ -23,7 +23,7 @@ Please review the [Contributing Guide](https://github.com/stacksjs/contributing)
 
 ## Stargazers
 
-[![Stargazers](https://starchart.cc/stacksjs/vidx.svg?variant=adaptive)](https://starchart.cc/stacksjs/vidx)
+[![Stargazers](https://starchart.cc/stacksjs/ts-videos.svg?variant=adaptive)](https://starchart.cc/stacksjs/ts-videos)
 
 ## Community
 
@@ -51,7 +51,7 @@ We would like to extend our thanks to the following sponsors for funding Stacks 
 ## Credits
 
 - [Chris Breuer](https://github.com/chrisbbreuer)
-- [All Contributors](https://github.com/stacksjs/vidx/graphs/contributors)
+- [All Contributors](https://github.com/stacksjs/ts-videos/graphs/contributors)
 
 ## License
 
@@ -61,5 +61,5 @@ Made with 💙
 
 <!-- Badges -->
 
-<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/vidx/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/vidx -->
+<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-videos/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/stacksjs/ts-videos -->

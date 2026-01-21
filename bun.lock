@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "@stacksjs/vidx",
+      "name": "@stacksjs/ts-videos",
       "devDependencies": {
         "@stacksjs/bumpx": "^0.1.17",
         "@stacksjs/clarity": "^0.3.23",

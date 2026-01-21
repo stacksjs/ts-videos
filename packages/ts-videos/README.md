@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/stacksjs/vidx/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
+<p align="center"><img src="https://github.com/stacksjs/ts-videos/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
 
 [![npm version][npm-version-src]][npm-version-href]
 [![GitHub Actions][github-actions-src]][github-actions-href]
@@ -20,7 +20,7 @@
 ## Install
 
 ```bash
-bun install -d @stacksjs/vidx
+bun install -d @stacksjs/ts-videos
 ```
 
 <!-- _Alternatively, you can install:_
@@ -56,7 +56,7 @@ The Reverse Proxy can be configured using a `vidx.config.ts` _(or `vidx.config.j
 
 ```ts
 // vidx.config.{ts,js}
-import type { vidxOptions } from '@stacksjs/vidx'
+import type { vidxOptions } from '@stacksjs/ts-videos'
 
 const config: vidxOptions = {
   verbose: true,
@@ -122,10 +122,10 @@ The MIT License (MIT). Please see [LICENSE](https://github.com/stacksjs/stacks/t
 Made with 💙
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/@stacksjs/vidx?style=flat-square
-[npm-version-href]: https://npmjs.com/package/@stacksjs/vidx
-[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/vidx/ci.yml?style=flat-square&branch=main
-[github-actions-href]: https://github.com/stacksjs/vidx/actions?query=workflow%3Aci
+[npm-version-src]: https://img.shields.io/npm/v/@stacksjs/ts-videos?style=flat-square
+[npm-version-href]: https://npmjs.com/package/@stacksjs/ts-videos
+[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/ts-videos/ci.yml?style=flat-square&branch=main
+[github-actions-href]: https://github.com/stacksjs/ts-videos/actions?query=workflow%3Aci
 
-<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/vidx/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/vidx -->
+<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-videos/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/stacksjs/ts-videos -->

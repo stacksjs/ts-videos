@@ -7,8 +7,8 @@ There are two ways of using this reverse proxy: _as a library or as a CLI._
 Given the npm package is installed:
 
 ```ts
-import type { TlsConfig } from '@stacksjs/vidx'
-import { startProxy } from '@stacksjs/vidx'
+import type { TlsConfig } from '@stacksjs/ts-videos'
+import { startProxy } from '@stacksjs/ts-videos'
 
 export interface CleanupConfig {
   hosts: boolean // clean up /etc/hosts, defaults to false
@@ -39,7 +39,7 @@ In case you are trying to start multiple proxies, you may use this configuration
 
 ```ts
 // vidx.config.{ts,js}
-import type { ReverseProxyOptions } from '@stacksjs/vidx'
+import type { ReverseProxyOptions } from '@stacksjs/ts-videos'
 import os from 'node:os'
 import path from 'node:path'
 
