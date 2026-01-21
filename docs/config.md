@@ -4,7 +4,7 @@ The Reverse Proxy can be configured using a `vidx.config.ts` _(or `vidx.config.j
 
 ```ts
 // vidx.config.{ts,js}
-import type { ReverseProxyOptions } from '@stacksjs/vidx'
+import type { ReverseProxyOptions } from '@stacksjs/ts-videos'
 import os from 'node:os'
 import path from 'node:path'
 

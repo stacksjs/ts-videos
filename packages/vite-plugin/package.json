@@ -5,13 +5,13 @@
   "description": "Vite plugin for vidx.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
-  "homepage": "https://github.com/stacksjs/vidx",
+  "homepage": "https://github.com/stacksjs/ts-videos",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stacksjs/vidx.git"
+    "url": "git+https://github.com/stacksjs/ts-videos.git"
   },
   "bugs": {
-    "url": "https://github.com/stacksjs/vidx/issues"
+    "url": "https://github.com/stacksjs/ts-videos/issues"
   },
   "keywords": [
     "video",
@@ -43,7 +43,7 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "dependencies": {
-    "@stacksjs/vidx": "workspace:*"
+    "@stacksjs/ts-videos": "workspace:*"
   },
   "simple-git-hooks": {
     "pre-commit": "bunx lint-staged"

@@ -22,7 +22,7 @@ const nav = [
   { text: 'News', link: 'https://stacksjs.org/news' },
   {
     text: 'Changelog',
-    link: 'https://github.com/stacksjs/vidx/blob/main/CHANGELOG.md',
+    link: 'https://github.com/stacksjs/ts-videos/blob/main/CHANGELOG.md',
   },
   // { text: 'Blog', link: 'https://updates.ow3.org' },
   {
@@ -123,7 +123,7 @@ export default withPwa(
       socialLinks: [
         { icon: 'twitter', link: 'https://twitter.com/stacksjs' },
         { icon: 'bluesky', link: 'https://bsky.app/profile/chrisbreuer.dev' },
-        { icon: 'github', link: 'https://github.com/stacksjs/vidx' },
+        { icon: 'github', link: 'https://github.com/stacksjs/ts-videos' },
         { icon: 'discord', link: 'https://discord.gg/stacksjs' },
       ],
 
