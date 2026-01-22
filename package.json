@@ -1,28 +1,41 @@
 {
-  "name": "vidx",
+  "name": "ts-videos-monorepo",
   "type": "module",
   "version": "0.0.0",
   "private": true,
-  "description": "Modern video tooling.",
+  "description": "Modern video tooling - zero dependency TypeScript media toolkit.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
-  "homepage": "https://github.com/stacksjs/vidx",
+  "homepage": "https://github.com/stacksjs/ts-videos",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stacksjs/vidx.git"
+    "url": "git+https://github.com/stacksjs/ts-videos.git"
   },
   "bugs": {
-    "url": "https://github.com/stacksjs/vidx/issues"
+    "url": "https://github.com/stacksjs/ts-videos/issues"
   },
   "keywords": [
     "video",
-    "bun",
-    "stacks",
+    "audio",
+    "media",
+    "codec",
+    "mp4",
+    "webm",
+    "mp3",
+    "aac",
+    "flac",
+    "ogg",
+    "demuxer",
+    "muxer",
     "typescript",
-    "javascript"
+    "zero-dependency"
+  ],
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "bun build.ts",
+    "build": "bun run build:packages",
+    "build:packages": "bun run --filter '*' build",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "test": "bun test",
     "lint": "bunx --bun eslint .",
@@ -30,33 +43,21 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
-    "postinstall": "bunx git-hooks",
+    "postinstall": "bunx bun-git-hooks",
     "typecheck": "bunx tsc --noEmit",
-    "dev:docs": "bun --bun vitepress dev docs",
-    "build:docs": "bun --bun vitepress build docs",
-    "preview:docs": "bun --bun vitepress preview docs"
+    "dev:docs": "bun --bun bunpress dev docs",
+    "build:docs": "bun --bun bunpress build docs",
+    "deploy:docs": "bun --bun bunpress deploy docs",
+    "preview:docs": "bun --bun bunpress preview docs"
   },
   "devDependencies": {
-    "@stacksjs/bumpx": "^0.1.17",
-    "@stacksjs/clarity": "^0.3.24",
-    "@stacksjs/docs": "^0.70.23",
-    "@stacksjs/eslint-config": "^4.10.2-beta.3",
-    "@stacksjs/gitlint": "^0.1.5",
-    "@stacksjs/logsmith": "^0.1.8",
-    "@types/bun": "^1.3.6",
-    "buddy-bot": "^0.8.9",
-    "bun-git-hooks": "^0.2.19",
-    "bun-plugin-dtsx": "^0.21.17",
-    "typescript": "^5.9.3",
-    "unocss": "^66.6.0"
-  },
-  "overrides": {
-    "unconfig": "0.3.10"
+    "better-dx": "^0.2.5",
+    "bun-plugin-dtsx": "^0.21.17"
   },
   "git-hooks": {
     "pre-commit": {
       "staged-lint": {
-        "*.{js,ts,json,yaml,yml,md}": "bunx --bun eslint --fix"
+        "*.{js,ts,json,yaml,yml,md}": "bunx --bun pickier --fix"
       }
     },
     "commit-msg": "bunx gitlint --edit .git/COMMIT_EDITMSG"
