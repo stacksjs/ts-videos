@@ -1,0 +1,46 @@
+{
+  "name": "@ts-videos/ts",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "MPEG Transport Stream codec package for ts-videos - zero dependency TypeScript implementation.",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-videos",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-videos.git"
+  },
+  "keywords": [
+    "mpeg-ts",
+    "transport-stream",
+    "ts",
+    "video",
+    "streaming",
+    "typescript",
+    "zero-dependency"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "peerDependencies": {
+    "ts-videos": "workspace:*"
+  },
+  "devDependencies": {
+    "ts-videos": "workspace:*",
+    "bun-plugin-dtsx": "^0.9.9"
+  }
+}

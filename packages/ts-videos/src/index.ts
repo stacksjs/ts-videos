@@ -33,6 +33,30 @@ export { Conversion } from './conversion'
 // Format registry
 export { FormatRegistry, registerFormat, detectFormat, ALL_FORMATS } from './formats'
 
+// Media sources for encoding input
+export * from './sources'
+
+// Media sinks for decoded sample access
+export * from './sinks'
+
+// Thumbnail and frame extraction
+export * from './thumbnails'
+
+// Waveform generation
+export * from './waveform'
+
+// Audio analysis
+export * from './audio-analysis'
+
+// HDR and color space detection
+export * from './color'
+
+// Streaming utilities
+export * from './streaming'
+
+// Cover art extraction
+export * from './cover-art'
+
 // Re-export audio utilities from ts-audio
 export {
   // Audio types
