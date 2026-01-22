@@ -84,6 +84,36 @@ export * from './metadata'
 // Media validation
 export * from './validation'
 
+// Subtitle support (SRT, VTT, ASS, TTML)
+export * from './subtitles'
+
+// Loudness normalization (EBU R128)
+export * from './loudness'
+
+// Scene detection
+export * from './scene-detection'
+
+// Video quality metrics (PSNR, SSIM, etc.)
+export * from './quality-metrics'
+
+// Encoding presets for social media platforms
+export * from './presets'
+
+// Concatenation and splitting utilities
+export * from './concat-split'
+
+// GIF generation (using ts-gif)
+export * from './gif'
+
+// Interlace detection
+export * from './interlace'
+
+// HDR to SDR conversion
+export * from './hdr-sdr'
+
+// Batch processing
+export * from './batch'
+
 // Re-export audio utilities from ts-audio
 export {
   // Audio types
