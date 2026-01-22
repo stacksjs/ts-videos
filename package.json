@@ -1,9 +1,9 @@
 {
-  "name": "ts-videos",
+  "name": "ts-videos-monorepo",
   "type": "module",
   "version": "0.0.0",
   "private": true,
-  "description": "Modern video tooling.",
+  "description": "Modern video tooling - zero dependency TypeScript media toolkit.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
   "homepage": "https://github.com/stacksjs/ts-videos",
@@ -16,13 +16,26 @@
   },
   "keywords": [
     "video",
-    "bun",
-    "stacks",
+    "audio",
+    "media",
+    "codec",
+    "mp4",
+    "webm",
+    "mp3",
+    "aac",
+    "flac",
+    "ogg",
+    "demuxer",
+    "muxer",
     "typescript",
-    "javascript"
+    "zero-dependency"
+  ],
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "bun build.ts",
+    "build": "bun run build:packages",
+    "build:packages": "bun run --filter '*' build",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "test": "bun test",
     "lint": "bunx --bun eslint .",
@@ -38,7 +51,8 @@
     "preview:docs": "bun --bun bunpress preview docs"
   },
   "devDependencies": {
-    "better-dx": "^0.2.5"
+    "better-dx": "^0.2.5",
+    "bun-plugin-dtsx": "^0.1.0"
   },
   "git-hooks": {
     "pre-commit": {

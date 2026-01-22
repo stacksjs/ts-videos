@@ -2,7 +2,7 @@
   "name": "ts-videos",
   "type": "module",
   "version": "0.0.0",
-  "description": "Modern video tooling.",
+  "description": "Modern video tooling - zero dependency TypeScript media toolkit.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
   "homepage": "https://github.com/stacksjs/ts-videos",
@@ -15,21 +15,26 @@
   },
   "keywords": [
     "video",
-    "bun",
-    "stacks",
+    "audio",
+    "media",
+    "codec",
+    "demuxer",
+    "muxer",
+    "mp4",
+    "webm",
     "typescript",
-    "javascript"
+    "zero-dependency"
   ],
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
-  "module": "./dist/src/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "vidx": "./dist/bin/cli.js"
+    "ts-videos": "./dist/bin/cli.js"
   },
   "files": [
     "README.md",
@@ -45,12 +50,17 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "devDependencies": {
-    "better-dx": "^0.2.5"
+    "@stacksjs/clapp": "^0.3.0",
+    "better-dx": "^0.2.5",
+    "bun-plugin-dtsx": "^0.1.0"
   },
-  "simple-git-hooks": {
-    "pre-commit": "bunx lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,ts}": "bunx pickier . --fix"
+  "optionalDependencies": {
+    "@ts-videos/mp4": "workspace:*",
+    "@ts-videos/webm": "workspace:*",
+    "@ts-videos/mp3": "workspace:*",
+    "@ts-videos/wav": "workspace:*",
+    "@ts-videos/aac": "workspace:*",
+    "@ts-videos/flac": "workspace:*",
+    "@ts-videos/ogg": "workspace:*"
   }
 }
