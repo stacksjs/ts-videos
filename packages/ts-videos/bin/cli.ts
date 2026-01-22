@@ -107,24 +107,24 @@ cli
           outputFormat = new MkvOutputFormat()
           break
         case 'mp3':
-          const { Mp3OutputFormat } = await import('@ts-videos/mp3')
+          const { Mp3OutputFormat } = await import('@ts-audio/mp3')
           outputFormat = new Mp3OutputFormat()
           break
         case 'wav':
-          const { WavOutputFormat } = await import('@ts-videos/wav')
+          const { WavOutputFormat } = await import('@ts-audio/wav')
           outputFormat = new WavOutputFormat()
           break
         case 'aac':
-          const { AacOutputFormat } = await import('@ts-videos/aac')
+          const { AacOutputFormat } = await import('@ts-audio/aac')
           outputFormat = new AacOutputFormat()
           break
         case 'flac':
-          const { FlacOutputFormat } = await import('@ts-videos/flac')
+          const { FlacOutputFormat } = await import('@ts-audio/flac')
           outputFormat = new FlacOutputFormat()
           break
         case 'ogg':
         case 'oga':
-          const { OggOutputFormat } = await import('@ts-videos/ogg')
+          const { OggOutputFormat } = await import('@ts-audio/ogg')
           outputFormat = new OggOutputFormat()
           break
         default:

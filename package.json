@@ -43,7 +43,7 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
-    "postinstall": "bunx git-hooks",
+    "postinstall": "bunx bun-git-hooks",
     "typecheck": "bunx tsc --noEmit",
     "dev:docs": "bun --bun bunpress dev docs",
     "build:docs": "bun --bun bunpress build docs",
@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "better-dx": "^0.2.5",
-    "bun-plugin-dtsx": "^0.1.0"
+    "bun-plugin-dtsx": "^0.9.9"
   },
   "git-hooks": {
     "pre-commit": {
