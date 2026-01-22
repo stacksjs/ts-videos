@@ -57,6 +57,33 @@ export * from './streaming'
 // Cover art extraction
 export * from './cover-art'
 
+// HLS manifest generation
+export * from './hls'
+
+// DASH manifest generation
+export * from './dash'
+
+// Video filters
+export * from './filters'
+
+// Audio effects
+export * from './audio-effects'
+
+// Codec configuration parsing
+export * from './codecs'
+
+// Chapter support
+export * from './chapters'
+
+// Image sequence support
+export * from './image-sequence'
+
+// Metadata reading/writing
+export * from './metadata'
+
+// Media validation
+export * from './validation'
+
 // Re-export audio utilities from ts-audio
 export {
   // Audio types
