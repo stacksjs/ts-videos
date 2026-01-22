@@ -32,3 +32,31 @@ export { Conversion } from './conversion'
 
 // Format registry
 export { FormatRegistry, registerFormat, detectFormat, ALL_FORMATS } from './formats'
+
+// Re-export audio utilities from ts-audio
+export {
+  // Audio types
+  type AudioCodec,
+  type AudioTrack,
+  type AudioMetadata,
+  type AudioFrame,
+  type SampleFormat,
+  type ChannelLayout,
+  // Audio utilities
+  formatSampleRate,
+  getChannelLayoutName,
+  floatToInt16,
+  int16ToFloat,
+  interleaveChannels,
+  deinterleaveChannels,
+  calculateRMS,
+  calculatePeak,
+  dbToLinear,
+  linearToDb,
+  applyGain,
+  mixBuffers,
+  normalize,
+  fadeIn,
+  fadeOut,
+  resampleLinear,
+} from 'ts-audio'
