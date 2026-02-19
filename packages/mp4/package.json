@@ -28,6 +28,22 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./boxes": {
+      "import": "./dist/boxes.js",
+      "types": "./dist/boxes.d.ts"
+    },
+    "./demuxer": {
+      "import": "./dist/demuxer.js",
+      "types": "./dist/demuxer.d.ts"
+    },
+    "./fragmented": {
+      "import": "./dist/fragmented.js",
+      "types": "./dist/fragmented.d.ts"
+    },
+    "./muxer": {
+      "import": "./dist/muxer.js",
+      "types": "./dist/muxer.d.ts"
     }
   },
   "module": "./dist/index.js",

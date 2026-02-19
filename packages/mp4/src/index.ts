@@ -2,8 +2,13 @@
  * MP4/MOV (ISOBMFF) codec package for ts-videos
  */
 
-import type { Source, Target } from 'ts-videos'
-import { InputFormat, OutputFormat, Demuxer, Muxer, Reader } from 'ts-videos'
+import type { Source } from 'ts-videos/reader'
+import type { Target } from 'ts-videos/writer'
+import { Demuxer } from 'ts-videos/demuxer'
+import { InputFormat } from 'ts-videos/demuxer'
+import { Muxer } from 'ts-videos/muxer'
+import { OutputFormat } from 'ts-videos/muxer'
+import { Reader } from 'ts-videos/reader'
 import { Mp4Demuxer } from './demuxer'
 import { Mp4Muxer, type Mp4MuxerOptions } from './muxer'
 import { FragmentedMp4Muxer, type FragmentedMp4Options } from './fragmented'
