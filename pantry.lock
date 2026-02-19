@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "lockfileVersion": 1,
+  "generatedAt": "1771533932",
+  "packages": {
+    "npm:@stacksjs/clapp@^0.2.0": {
+      "name": "npm:@stacksjs/clapp",
+      "version": "^0.2.0",
+      "source": "pkgx"
+    },
+    "better-dx@^0.2.5": {
+      "name": "better-dx",
+      "version": "^0.2.5",
+      "source": "pkgx"
+    },
+    "bun-plugin-dtsx@^0.9.9": {
+      "name": "bun-plugin-dtsx",
+      "version": "^0.9.9",
+      "source": "pkgx"
+    }
+  }
+}
