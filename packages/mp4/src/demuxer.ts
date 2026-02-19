@@ -2,8 +2,10 @@
  * MP4/MOV demuxer implementation
  */
 
-import type { Source, Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec } from 'ts-videos'
-import { Demuxer, Reader } from 'ts-videos'
+import type { Source } from 'ts-videos/reader'
+import type { Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec } from 'ts-videos/types'
+import { Demuxer } from 'ts-videos/demuxer'
+import { Reader } from 'ts-videos/reader'
 import type {
   Box, FtypBox, MvhdBox, TkhdBox, MdhdBox, HdlrBox, StsdBox,
   SttsBox, CttsBox, StscBox, StszBox, StcoBox, Co64Box, StssBox,

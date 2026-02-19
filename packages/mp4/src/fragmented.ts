@@ -3,9 +3,11 @@
  * Supports streaming output with movie fragments (moof + mdat)
  */
 
-import type { Target, EncodedPacket } from 'ts-videos'
-import { Muxer, Writer } from 'ts-videos'
-import type { OutputVideoTrack, OutputAudioTrack, OutputSubtitleTrack } from 'ts-videos'
+import type { Target } from 'ts-videos/writer'
+import type { EncodedPacket } from 'ts-videos/types'
+import { Muxer } from 'ts-videos/muxer'
+import type { OutputVideoTrack, OutputAudioTrack, OutputSubtitleTrack } from 'ts-videos/muxer'
+import { Writer } from 'ts-videos/writer'
 import { encodeLanguageCode, TIMESCALE_1904_TO_1970 } from './boxes'
 
 const GLOBAL_TIMESCALE = 1000
