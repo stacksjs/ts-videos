@@ -943,44 +943,40 @@ export class Mp4Muxer extends Muxer {
 
   private async buildTextSampleEntry(): Promise<Uint8Array> {
     const writer = new Writer()
-    // QuickTime text sample description (60 bytes total)
-    await writer.writeU32BE(60)
+    // QuickTime text sample entry (59 bytes total, matching ffmpeg's format)
+    // Uses truncated text description + ftab extension
+    await writer.writeU32BE(59)
     await writer.writeFourCC('text')
     // reserved (6 bytes)
     await writer.writeU32BE(0)
     await writer.writeU16BE(0)
     // data reference index
     await writer.writeU16BE(1)
-    // display flags
-    await writer.writeU32BE(0)
-    // text justification (1 = center)
+    // display flags = 1
     await writer.writeU32BE(1)
-    // background color (R, G, B — 2 bytes each)
+    // text justification = 0 (left)
+    await writer.writeU32BE(0)
+    // background color (black)
     await writer.writeU16BE(0)
     await writer.writeU16BE(0)
     await writer.writeU16BE(0)
-    // default text box (top, left, bottom, right)
+    // default text box (top=0, left=0, bottom=0, right=1)
     await writer.writeU16BE(0)
     await writer.writeU16BE(0)
     await writer.writeU16BE(0)
-    await writer.writeU16BE(0)
+    await writer.writeU16BE(1)
     // reserved (8 bytes)
     await writer.writeU32BE(0)
     await writer.writeU32BE(0)
     // font number
     await writer.writeU16BE(0)
     // font face
-    await writer.writeU16BE(0)
-    // reserved (1 byte)
-    await writer.writeU8(0)
-    // reserved (2 bytes)
-    await writer.writeU16BE(0)
-    // foreground color (white)
-    await writer.writeU16BE(0xFFFF)
-    await writer.writeU16BE(0xFFFF)
-    await writer.writeU16BE(0xFFFF)
-    // font name (Pascal string — 0 length = empty)
-    await writer.writeU8(0)
+    await writer.writeU16BE(13)
+    // ftab (font table) extension
+    await writer.writeFourCC('ftab')
+    await writer.writeU16BE(1) // 1 font entry
+    await writer.writeU16BE(1) // font ID = 1
+    await writer.writeU8(0) // font name length = 0
     return writer.getBuffer()
   }
 
@@ -1040,8 +1036,8 @@ export class Mp4Muxer extends Muxer {
     await mdhdWriter.writeU32BE(Number(now & 0xFFFFFFFFn))
     await mdhdWriter.writeU32BE(timescale)
     await mdhdWriter.writeU32BE(totalDurationMs)
-    await mdhdWriter.writeU16BE(encodeLanguageCode('und'))
-    await mdhdWriter.writeU16BE(0)
+    await mdhdWriter.writeU16BE(0) // language = 0 (Macintosh undetermined, compatible with AVFoundation)
+    await mdhdWriter.writeU16BE(0) // quality
     const mdhd = mdhdWriter.getBuffer()
 
     // ── hdlr for text ──
@@ -1058,12 +1054,48 @@ export class Mp4Muxer extends Muxer {
     await hdlrWriter.writeBytes(hdlrNameBytes)
     const hdlr = hdlrWriter.getBuffer()
 
-    // ── nmhd (12 bytes) ──
-    const nmhdWriter = new Writer()
-    await nmhdWriter.writeU32BE(12)
-    await nmhdWriter.writeFourCC('nmhd')
-    await nmhdWriter.writeU32BE(0)
-    const nmhd = nmhdWriter.getBuffer()
+    // ── edts/elst (edit list — maps track time to media time) ──
+    const edtsWriter = new Writer()
+    // elst: version(4) + entry_count(4) + entry(duration:4 + media_time:4 + media_rate:4) = 20 content
+    await edtsWriter.writeU32BE(36) // edts size
+    await edtsWriter.writeFourCC('edts')
+    await edtsWriter.writeU32BE(28) // elst size
+    await edtsWriter.writeFourCC('elst')
+    await edtsWriter.writeU32BE(0) // version + flags
+    await edtsWriter.writeU32BE(1) // entry count
+    await edtsWriter.writeU32BE(totalDurationMs) // duration in movie timescale
+    await edtsWriter.writeU32BE(0) // media_time = 0 (start)
+    await edtsWriter.writeU32BE(0x00010000) // media_rate = 1.0 (fixed-point 16.16)
+    const edts = edtsWriter.getBuffer()
+
+    // ── gmhd (generic media header — required for QuickTime text tracks) ──
+    const gmhdWriter = new Writer()
+    await gmhdWriter.writeU32BE(76) // gmhd total size
+    await gmhdWriter.writeFourCC('gmhd')
+    // gmin (generic media information — 24 bytes)
+    await gmhdWriter.writeU32BE(24)
+    await gmhdWriter.writeFourCC('gmin')
+    await gmhdWriter.writeU32BE(0) // version + flags
+    await gmhdWriter.writeU16BE(0x0040) // graphicsMode = ditherCopy
+    await gmhdWriter.writeU16BE(0x8000) // opColor R
+    await gmhdWriter.writeU16BE(0x8000) // opColor G
+    await gmhdWriter.writeU16BE(0x8000) // opColor B
+    await gmhdWriter.writeU16BE(0) // balance
+    await gmhdWriter.writeU16BE(0) // reserved
+    // text (text media information — 44 bytes, contains identity matrix)
+    await gmhdWriter.writeU32BE(44)
+    await gmhdWriter.writeFourCC('text')
+    // Identity matrix (36 bytes in 16.16 and 2.30 fixed point)
+    await gmhdWriter.writeU32BE(0x00010000) // a = 1.0
+    await gmhdWriter.writeU32BE(0) // b
+    await gmhdWriter.writeU32BE(0) // u
+    await gmhdWriter.writeU32BE(0) // c
+    await gmhdWriter.writeU32BE(0x00010000) // d = 1.0
+    await gmhdWriter.writeU32BE(0) // v
+    await gmhdWriter.writeU32BE(0) // x
+    await gmhdWriter.writeU32BE(0) // y
+    await gmhdWriter.writeU32BE(0x40000000) // w = 1.0 (2.30)
+    const gmhd = gmhdWriter.getBuffer()
 
     // ── dinf (reuse existing) ──
     const dinf = await this.buildDinf()
@@ -1150,11 +1182,11 @@ export class Mp4Muxer extends Muxer {
     const stbl = stblWriter.getBuffer()
 
     // ── Assemble minf ──
-    const minfSize = 8 + nmhd.byteLength + dinf.byteLength + stbl.byteLength
+    const minfSize = 8 + gmhd.byteLength + dinf.byteLength + stbl.byteLength
     const minfWriter = new Writer()
     await minfWriter.writeU32BE(minfSize)
     await minfWriter.writeFourCC('minf')
-    await minfWriter.writeBytes(nmhd)
+    await minfWriter.writeBytes(gmhd)
     await minfWriter.writeBytes(dinf)
     await minfWriter.writeBytes(stbl)
     const minf = minfWriter.getBuffer()
@@ -1169,11 +1201,12 @@ export class Mp4Muxer extends Muxer {
     await mdiaWriter.writeBytes(minf)
     const mdia = mdiaWriter.getBuffer()
 
-    // ── Assemble trak ──
-    const trakSize = 8 + tkhd.byteLength + mdia.byteLength
+    // ── Assemble trak (tkhd + edts + mdia) ──
+    const trakSize = 8 + tkhd.byteLength + edts.byteLength + mdia.byteLength
     await writer.writeU32BE(trakSize)
     await writer.writeFourCC('trak')
     await writer.writeBytes(tkhd)
+    await writer.writeBytes(edts)
     await writer.writeBytes(mdia)
 
     return writer.getBuffer()
