@@ -1,9 +1,11 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * GIF generation from video frames
  * Uses ts-gif for encoding with additional video-specific utilities
  */
 
-import { Writer as GifWriter, Reader as GifReader } from 'ts-gif'
+// @ts-expect-error - optional peer dependency
+import { Writer as GifWriter, Reader as GifReader } from 'ts-gif' // eslint-disable-line
 import { Buffer } from 'node:buffer'
 
 // ============================================================================
@@ -101,10 +103,10 @@ export function quantizeColors(
   }))
 
   // Median cut algorithm
-  const _palette = medianCut(colors, colorCount)
+  const palette = medianCut(colors, colorCount)
 
   // Convert to packed RGB values
-  return palette.map((c) => (c.r << 16) | (c.g << 8) | c.b)
+  return palette.map((c: { r: number, g: number, b: number }) => (c.r << 16) | (c.g << 8) | c.b)
 }
 
 interface ColorBox {

@@ -1,4 +1,21 @@
-import type { ProxyOptions } from './packages/vidx/src/types'
+interface ProxyOptions {
+  https: boolean
+  cleanup: {
+    hosts: boolean
+    certs: boolean
+  }
+  proxies: Array<{
+    from: string
+    to: string
+    cleanUrls?: boolean
+    start?: {
+      command: string
+      lazy?: boolean
+    }
+  }>
+  vitePluginUsage: boolean
+  verbose: boolean
+}
 
 const config: ProxyOptions = {
   https: true,

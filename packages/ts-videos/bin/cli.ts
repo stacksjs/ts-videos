@@ -99,31 +99,38 @@ cli
           outputFormat = new Mp4OutputFormat({ fastStart: options.fastStart as boolean })
           break
         case 'webm':
+          // @ts-expect-error - optional peer dependency
           const { WebmOutputFormat } = await import('@ts-videos/webm')
           outputFormat = new WebmOutputFormat()
           break
         case 'mkv':
+          // @ts-expect-error - optional peer dependency
           const { MkvOutputFormat } = await import('@ts-videos/webm')
           outputFormat = new MkvOutputFormat()
           break
         case 'mp3':
+          // @ts-expect-error - optional peer dependency
           const { Mp3OutputFormat } = await import('@ts-audio/mp3')
           outputFormat = new Mp3OutputFormat()
           break
         case 'wav':
+          // @ts-expect-error - optional peer dependency
           const { WavOutputFormat } = await import('@ts-audio/wav')
           outputFormat = new WavOutputFormat()
           break
         case 'aac':
+          // @ts-expect-error - optional peer dependency
           const { AacOutputFormat } = await import('@ts-audio/aac')
           outputFormat = new AacOutputFormat()
           break
         case 'flac':
+          // @ts-expect-error - optional peer dependency
           const { FlacOutputFormat } = await import('@ts-audio/flac')
           outputFormat = new FlacOutputFormat()
           break
         case 'ogg':
         case 'oga':
+          // @ts-expect-error - optional peer dependency
           const { OggOutputFormat } = await import('@ts-audio/ogg')
           outputFormat = new OggOutputFormat()
           break

@@ -170,7 +170,7 @@ export class MkvOutputFormat extends OutputFormat {
   }
 }
 
-export const WEBM = new WebmInputFormat()
-export const MKV = new MkvInputFormat()
-export const WEBM_OUTPUT = new WebmOutputFormat()
-export const MKV_OUTPUT = new MkvOutputFormat()
+export const WEBM: WebmInputFormat = new WebmInputFormat()
+export const MKV: MkvInputFormat = new MkvInputFormat()
+export const WEBM_OUTPUT: WebmOutputFormat = new WebmOutputFormat()
+export const MKV_OUTPUT: MkvOutputFormat = new MkvOutputFormat()

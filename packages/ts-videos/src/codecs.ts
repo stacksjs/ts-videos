@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Codec configuration parsing for H.264, H.265, and AAC
  * Parses parameter sets and extracts codec metadata
@@ -613,7 +614,7 @@ export function parseH264Pps(data: Uint8Array): H264Pps {
   let picScalingMatrixPresentFlag: boolean | undefined
   let secondChromaQpIndexOffset: number | undefined
 
-  if (reader.bitsRemaining() > 8) {
+  if (reader.bitsRemaining > 8) {
     transform8x8ModeFlag = reader.readBits(1) === 1
     picScalingMatrixPresentFlag = reader.readBits(1) === 1
     if (picScalingMatrixPresentFlag) {
@@ -1192,7 +1193,7 @@ export function parseH265Pps(data: Uint8Array): H265Pps {
 }
 
 /** Parse H.265 Profile/Tier/Level */
-function parseH265ProfileTierLevel(reader: BitstreamReader, profilePresentFlag: boolean, _maxSubLayersMinus1: number): H265ProfileTierLevel {
+function parseH265ProfileTierLevel(reader: BitstreamReader, profilePresentFlag: boolean, maxSubLayersMinus1: number): H265ProfileTierLevel {
   let generalProfileSpace = 0
   let generalTierFlag = false
   let generalProfileIdc = 0
@@ -1542,12 +1543,12 @@ export const AacObjectType = {
 } as const
 
 /** AAC sampling frequencies */
-export const AAC_SAMPLE_RATES = [
+export const AAC_SAMPLE_RATES: number[] = [
   96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350,
 ]
 
 /** AAC channel configurations */
-export const AAC_CHANNEL_CONFIGS = [
+export const AAC_CHANNEL_CONFIGS: number[] = [
   0, // defined in AOT specific config
   1, // 1 channel: front-center
   2, // 2 channels: front-left, front-right
@@ -1683,7 +1684,7 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
   }
 
   // Check for implicit SBR/PS signaling
-  if (reader.bitsRemaining() >= 11) {
+  if (reader.bitsRemaining >= 11) {
     const syncExtensionType = reader.readBits(11)
     if (syncExtensionType === 0x2b7) {
       extensionAudioObjectType = reader.readBits(5)
@@ -1700,7 +1701,7 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
           else {
             extensionSamplingFrequency = AAC_SAMPLE_RATES[extensionSamplingFrequencyIndex] ?? 0
           }
-          if (reader.bitsRemaining() >= 12) {
+          if (reader.bitsRemaining >= 12) {
             const syncExtensionType2 = reader.readBits(11)
             if (syncExtensionType2 === 0x548) {
               psPresentFlag = reader.readBits(1) === 1

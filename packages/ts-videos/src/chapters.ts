@@ -539,7 +539,7 @@ function parseChapterDisplay(data: Uint8Array): { title: string; language: strin
         title = new TextDecoder('utf-8').decode(elementData)
         break
       case MATROSKA_IDS.CHAP_LANGUAGE:
-        language = new TextDecoder('ascii').decode(elementData)
+        language = new TextDecoder('ascii' as never).decode(elementData)
         break
     }
 
@@ -804,11 +804,11 @@ function parseId3ChapFrame(data: Uint8Array): Chapter | null {
 function decodeId3String(data: Uint8Array, encoding: number): string {
   switch (encoding) {
     case 0: // ISO-8859-1
-      return new TextDecoder('iso-8859-1').decode(data)
+      return new TextDecoder('iso-8859-1' as never).decode(data)
     case 1: // UTF-16 with BOM
-      return new TextDecoder('utf-16').decode(data)
+      return new TextDecoder('utf-16' as never).decode(data)
     case 2: // UTF-16BE
-      return new TextDecoder('utf-16be').decode(data)
+      return new TextDecoder('utf-16be' as never).decode(data)
     case 3: // UTF-8
       return new TextDecoder('utf-8').decode(data)
     default:

@@ -522,7 +522,7 @@ export class HdrToSdrConverter {
   private options: ConversionOptions
   private metadata: HdrMetadata
 
-  constructor(_metadata: HdrMetadata, options: ConversionOptions = {}) {
+  constructor(metadata: HdrMetadata, options: ConversionOptions = {}) {
     this.metadata = metadata
     this.options = {
       toneMapping: {
@@ -766,7 +766,7 @@ export function getHdrToSdrFilter(
 /**
  * Get conversion description for display
  */
-export function getConversionDescription(_metadata: HdrMetadata, options: ConversionOptions = {}): string {
+export function getConversionDescription(metadata: HdrMetadata, options: ConversionOptions = {}): string {
   const parts: string[] = []
 
   parts.push(`Source: ${metadata.colorSpace.toUpperCase()} / ${metadata.transferFunction.toUpperCase()}`)
@@ -784,7 +784,35 @@ export function getConversionDescription(_metadata: HdrMetadata, options: Conver
   return parts.join(', ')
 }
 
-export default {
+const _default: {
+  HdrToSdrConverter: typeof HdrToSdrConverter
+  pqToLinear: typeof pqToLinear
+  linearToPq: typeof linearToPq
+  hlgToLinear: typeof hlgToLinear
+  linearToHlg: typeof linearToHlg
+  gammaToLinear: typeof gammaToLinear
+  linearToGamma: typeof linearToGamma
+  srgbToLinear: typeof srgbToLinear
+  linearToSrgb: typeof linearToSrgb
+  toneMappingReinhard: typeof toneMappingReinhard
+  toneMappingReinhardExtended: typeof toneMappingReinhardExtended
+  toneMappingHable: typeof toneMappingHable
+  applyHableToneMapping: typeof applyHableToneMapping
+  toneMappingAces: typeof toneMappingAces
+  toneMappingAcesFitted: typeof toneMappingAcesFitted
+  toneMappingBt2390: typeof toneMappingBt2390
+  toneMappingMobius: typeof toneMappingMobius
+  applyToneMapping: typeof applyToneMapping
+  bt2020ToBt709: typeof bt2020ToBt709
+  bt709ToXyz: typeof bt709ToXyz
+  xyzToBt709: typeof xyzToBt709
+  bt2020ToXyz: typeof bt2020ToXyz
+  xyzToBt2020: typeof xyzToBt2020
+  applyGamutMapping: typeof applyGamutMapping
+  detectHdrFormat: typeof detectHdrFormat
+  getHdrToSdrFilter: typeof getHdrToSdrFilter
+  getConversionDescription: typeof getConversionDescription
+} = {
   HdrToSdrConverter,
   pqToLinear,
   linearToPq,
@@ -813,3 +841,4 @@ export default {
   getHdrToSdrFilter,
   getConversionDescription,
 }
+export default _default

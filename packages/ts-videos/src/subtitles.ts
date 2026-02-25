@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Subtitle support for reading and writing various subtitle formats
  * Supports SRT, VTT, ASS/SSA, TTML, and embedded subtitles

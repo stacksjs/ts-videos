@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Encoding presets for common platforms and use cases
  * Pre-configured settings for YouTube, Twitter, Instagram, etc.
@@ -136,7 +137,7 @@ export const RESOLUTIONS: Record<string, ResolutionPreset> = {
 }
 
 /** Aspect ratios */
-export const ASPECT_RATIOS = {
+export const ASPECT_RATIOS: Record<string, number> = {
   '16:9': 16 / 9,
   '4:3': 4 / 3,
   '21:9': 21 / 9,

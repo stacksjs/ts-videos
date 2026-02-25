@@ -3,7 +3,7 @@
  * Implements demuxing/muxing with PAT/PMT parsing
  */
 
-import type { Source, Target, VideoTrack, AudioTrack, Track, EncodedPacket, MediaMetadata } from 'ts-videos'
+import type { Source, Target, VideoTrack, AudioTrack, Track, EncodedPacket, MediaMetadata, VideoCodec, AudioCodec } from 'ts-videos'
 import { InputFormat, OutputFormat, Demuxer, Muxer, Reader } from 'ts-videos'
 
 // MPEG-TS constants
@@ -133,10 +133,10 @@ function parsePacket(data: Uint8Array, offset: number): TsPacket | null {
       // Parse PCR
       if (packet.adaptationField.pcrFlag && afOffset + 6 <= payloadStart + afLength) {
         const pcrBase = (BigInt(data[afOffset]) << 25n) |
-                       (BigInt(data[afOffset + 1]) << 17n) |
-                       (BigInt(data[afOffset + 2]) << 9n) |
-                       (BigInt(data[afOffset + 3]) << 1n) |
-                       (BigInt(data[afOffset + 4]) >> 7n)
+          (BigInt(data[afOffset + 1]) << 17n) |
+          (BigInt(data[afOffset + 2]) << 9n) |
+          (BigInt(data[afOffset + 3]) << 1n) |
+          (BigInt(data[afOffset + 4]) >> 7n)
         const pcrExt = ((data[afOffset + 4] & 0x01) << 8) | data[afOffset + 5]
         packet.adaptationField.pcr = pcrBase * 300n + BigInt(pcrExt)
         afOffset += 6
@@ -278,18 +278,18 @@ function streamTypeToCodec(streamType: number): string {
 
 function isVideoStreamType(streamType: number): boolean {
   return streamType === STREAM_TYPE_MPEG1_VIDEO ||
-         streamType === STREAM_TYPE_MPEG2_VIDEO ||
-         streamType === STREAM_TYPE_H264 ||
-         streamType === STREAM_TYPE_H265
+    streamType === STREAM_TYPE_MPEG2_VIDEO ||
+    streamType === STREAM_TYPE_H264 ||
+    streamType === STREAM_TYPE_H265
 }
 
 function isAudioStreamType(streamType: number): boolean {
   return streamType === STREAM_TYPE_MPEG1_AUDIO ||
-         streamType === STREAM_TYPE_MPEG2_AUDIO ||
-         streamType === STREAM_TYPE_AAC ||
-         streamType === STREAM_TYPE_AC3 ||
-         streamType === STREAM_TYPE_DTS ||
-         streamType === STREAM_TYPE_TRUEHD
+    streamType === STREAM_TYPE_MPEG2_AUDIO ||
+    streamType === STREAM_TYPE_AAC ||
+    streamType === STREAM_TYPE_AC3 ||
+    streamType === STREAM_TYPE_DTS ||
+    streamType === STREAM_TYPE_TRUEHD
 }
 
 export class TsDemuxer extends Demuxer {
@@ -469,6 +469,7 @@ export class TsDemuxer extends Demuxer {
   }
 
   private buildTracks(): void {
+    this._tracks = []
     let trackId = 1
 
     for (const stream of this.streams.values()) {
@@ -479,7 +480,7 @@ export class TsDemuxer extends Demuxer {
           type: 'video',
           id: trackId++,
           index: this._tracks.length,
-          codec,
+          codec: codec as VideoCodec,
           width: 0, // Would need to parse codec-specific data
           height: 0,
           isDefault: this._tracks.filter(t => t.type === 'video').length === 0,
@@ -492,7 +493,7 @@ export class TsDemuxer extends Demuxer {
           type: 'audio',
           id: trackId++,
           index: this._tracks.length,
-          codec,
+          codec: codec as AudioCodec,
           sampleRate: 48000, // Default, would need to parse from stream
           channels: 2,
           isDefault: this._tracks.filter(t => t.type === 'audio').length === 0,
@@ -520,7 +521,7 @@ export class TsDemuxer extends Demuxer {
   }
 
   async readPacket(trackId: number): Promise<EncodedPacket | null> {
-    const track = this._tracks.find(t => t.id === trackId)
+    const track = this._tracks?.find(t => t.id === trackId)
     if (!track) return null
 
     for (const stream of this.streams.values()) {
@@ -849,8 +850,8 @@ export class TsOutputFormat extends OutputFormat {
   }
 }
 
-export const MPEGTS = new TsInputFormat()
-export const MPEGTS_OUTPUT = new TsOutputFormat()
+export const MPEGTS: TsInputFormat = new TsInputFormat()
+export const MPEGTS_OUTPUT: TsOutputFormat = new TsOutputFormat()
 
 // Export types
 export type { TsPacket, AdaptationField, ProgramAssociationTable, ProgramMapTable, PmtStream, ElementaryStream, TsElementaryPacket }

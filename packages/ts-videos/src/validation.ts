@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Media validation utilities for checking file integrity and compliance
  * Validates container structure, codec parameters, and stream synchronization
@@ -872,14 +873,14 @@ export function validateMedia(
 
 /** Check if an error code is fatal (prevents playback) */
 function isFatalError(code: string): boolean {
-  const fatalCodes = [
+  const fatalCodes: string[] = [
     ValidationCodes.INVALID_HEADER,
     ValidationCodes.MISSING_MOOV,
     ValidationCodes.MISSING_SPS,
     ValidationCodes.MISSING_PPS,
     ValidationCodes.MISSING_CONFIG,
   ]
-  return fatalCodes.includes(code as typeof ValidationCodes[keyof typeof ValidationCodes])
+  return fatalCodes.includes(code)
 }
 
 /** Quick check if file is valid */

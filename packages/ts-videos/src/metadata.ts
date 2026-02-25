@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Metadata reading and writing for various media formats
  * Supports MP4, WebM/Matroska, ID3v2 (MP3), Vorbis Comments (FLAC/OGG)
@@ -916,7 +917,7 @@ export function parseFlacPicture(data: Uint8Array): CoverArt | null {
   if (offset + mimeLength > data.length) return null
 
   // MIME type
-  const mimeType = new TextDecoder('ascii').decode(data.slice(offset, offset + mimeLength))
+  const mimeType = new TextDecoder('ascii' as never).decode(data.slice(offset, offset + mimeLength))
   offset += mimeLength
 
   // Description length
@@ -1226,11 +1227,11 @@ function readString(data: Uint8Array, offset: number, length: number): string {
 function decodeString(data: Uint8Array, encoding: number): string {
   switch (encoding) {
     case 0:
-      return new TextDecoder('iso-8859-1').decode(data)
+      return new TextDecoder('iso-8859-1' as never).decode(data)
     case 1:
-      return new TextDecoder('utf-16').decode(data)
+      return new TextDecoder('utf-16' as never).decode(data)
     case 2:
-      return new TextDecoder('utf-16be').decode(data)
+      return new TextDecoder('utf-16be' as never).decode(data)
     case 3:
       return new TextDecoder('utf-8').decode(data)
     default:

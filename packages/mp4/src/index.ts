@@ -194,9 +194,9 @@ export class CmafOutputFormat extends OutputFormat {
   }
 }
 
-export const MP4 = new Mp4InputFormat()
-export const MOV = new MovInputFormat()
-export const MP4_OUTPUT = new Mp4OutputFormat()
-export const MOV_OUTPUT = new MovOutputFormat()
-export const FMP4_OUTPUT = new FragmentedMp4OutputFormat()
-export const CMAF_OUTPUT = new CmafOutputFormat()
+export const MP4: Mp4InputFormat = new Mp4InputFormat()
+export const MOV: MovInputFormat = new MovInputFormat()
+export const MP4_OUTPUT: Mp4OutputFormat = new Mp4OutputFormat()
+export const MOV_OUTPUT: MovOutputFormat = new MovOutputFormat()
+export const FMP4_OUTPUT: FragmentedMp4OutputFormat = new FragmentedMp4OutputFormat()
+export const CMAF_OUTPUT: CmafOutputFormat = new CmafOutputFormat()

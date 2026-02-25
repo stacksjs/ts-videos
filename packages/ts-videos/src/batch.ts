@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Batch processing utilities for video operations
  *
@@ -121,7 +122,7 @@ export class BatchProcessor<T = unknown> {
 
     const job: BatchJob<T> = {
       id,
-      input,
+      input: _input,
       output,
       options: jobOptions,
       status: 'pending',
@@ -641,7 +642,17 @@ export class BatchReporter<T = unknown> {
   }
 }
 
-export default {
+const _default: {
+  BatchProcessor: typeof BatchProcessor
+  BatchReporter: typeof BatchReporter
+  findFiles: typeof findFiles
+  generateOutputPath: typeof generateOutputPath
+  createBatchFromDirectory: typeof createBatchFromDirectory
+  batchProcess: typeof batchProcess
+  formatProgress: typeof formatProgress
+  formatTime: typeof formatTime
+  createProgressBar: typeof createProgressBar
+} = {
   BatchProcessor,
   BatchReporter,
   findFiles,
@@ -652,3 +663,4 @@ export default {
   formatTime,
   createProgressBar,
 }
+export default _default

@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Video filters for frame processing
  * Provides scale, crop, rotate, overlay, and color adjustment filters
@@ -737,7 +738,25 @@ export class FilterChain {
 /**
  * Convenience functions for creating filters
  */
-export const Filters = {
+export const Filters: {
+  scale: (options: ScaleOptions) => ScaleFilter
+  crop: (options: CropOptions) => CropFilter
+  rotate: (options: RotateOptions) => RotateFilter
+  flip: (options: FlipOptions) => FlipFilter
+  colorAdjust: (options: ColorAdjustOptions) => ColorAdjustFilter
+  blur: (options: BlurOptions) => BlurFilter
+  overlay: (options: OverlayOptions) => OverlayFilter
+  textOverlay: (options: TextOverlayOptions) => TextOverlayFilter
+  pad: (options: PadOptions) => PadFilter
+  grayscale: () => ColorAdjustFilter
+  sepia: () => ColorAdjustFilter
+  invert: () => ColorAdjustFilter
+  flipH: () => FlipFilter
+  flipV: () => FlipFilter
+  rotate90: () => RotateFilter
+  rotate180: () => RotateFilter
+  rotate270: () => RotateFilter
+} = {
   scale: (options: ScaleOptions) => new ScaleFilter(options),
   crop: (options: CropOptions) => new CropFilter(options),
   rotate: (options: RotateOptions) => new RotateFilter(options),

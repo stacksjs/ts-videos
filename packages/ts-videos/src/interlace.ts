@@ -502,7 +502,16 @@ function arraysMatch(a: number[], b: number[]): boolean {
   return true
 }
 
-export default {
+const _default: {
+  InterlaceDetector: typeof InterlaceDetector
+  detectInterlace: typeof detectInterlace
+  calculateCombScore: typeof calculateCombScore
+  analyzeFieldOrder: typeof analyzeFieldOrder
+  detectTelecinePattern: typeof detectTelecinePattern
+  recommendDeinterlacer: typeof recommendDeinterlacer
+  getDeinterlaceFilter: typeof getDeinterlaceFilter
+  getDeinterlaceDescription: typeof getDeinterlaceDescription
+} = {
   InterlaceDetector,
   detectInterlace,
   calculateCombScore,
@@ -512,3 +521,4 @@ export default {
   getDeinterlaceFilter,
   getDeinterlaceDescription,
 }
+export default _default

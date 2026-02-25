@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Comprehensive audio analysis utilities
  * Similar to mediabunny's audio analysis system

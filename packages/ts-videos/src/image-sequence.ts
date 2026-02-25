@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Image sequence support for reading and writing frame sequences
  * Supports common image formats (PNG, JPEG, WebP, BMP, TIFF)
@@ -325,7 +326,7 @@ export class ImageSequenceReader {
     }
 
     if (this.options.loop) {
-      if (this.options.loopCount === 0 || this.loopCount < this.options.loopCount) {
+      if (this.options.loopCount === 0 || (this.options.loopCount !== undefined && this.loopCount < this.options.loopCount)) {
         return true
       }
     }

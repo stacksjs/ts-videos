@@ -260,20 +260,20 @@ export function writeFourCC(view: DataView, offset: number, value: string): void
   }
 }
 
-export const CONTAINER_BOXES = new Set([
+export const CONTAINER_BOXES: Set<string> = new Set([
   'moov', 'trak', 'mdia', 'minf', 'stbl', 'dinf',
   'edts', 'udta', 'meta', 'ilst', 'moof', 'traf',
   'mvex', 'sinf', 'schi', 'rinf',
 ])
 
-export const MP4_BRANDS = new Set([
+export const MP4_BRANDS: Set<string> = new Set([
   'isom', 'iso2', 'iso3', 'iso4', 'iso5', 'iso6',
   'mp41', 'mp42', 'mp71', 'avc1', 'av01', 'hev1',
   'hvc1', 'M4A ', 'M4V ', 'M4P ', 'M4B ', 'f4v ',
   'f4a ', 'dash', 'msdh', 'msix',
 ])
 
-export const MOV_BRANDS = new Set(['qt  '])
+export const MOV_BRANDS: Set<string> = new Set(['qt  '])
 
 export function isVideoHandler(handlerType: string): boolean {
   return handlerType === 'vide'

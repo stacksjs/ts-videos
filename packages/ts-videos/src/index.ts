@@ -49,7 +49,14 @@ export * from './waveform'
 export * from './audio-analysis'
 
 // HDR and color space detection
-export * from './color'
+export {
+  ColorPrimaries, TransferCharacteristics, MatrixCoefficients, ColorRange,
+  HdrFormat, type ColorSpaceInfo, type HdrMetadata as ColorHdrMetadata, type MasteringDisplayMetadata as ColorMasteringDisplayMetadata,
+  detectHdrFormat as detectHdrFormatFromColorSpace, isHdr, isWideColorGamut, getColorSpaceName,
+  parseVuiColorSpace, parseHdr10Sei, parseContentLightLevelSei,
+  parseDolbyVisionConfig, STANDARD_PRIMARIES, createDefaultHdr10Metadata,
+  toVideoColorSpaceInit, fromVideoColorSpace,
+} from './color'
 
 // Streaming utilities
 export * from './streaming'
@@ -75,17 +82,64 @@ export * from './codecs'
 // Chapter support
 export * from './chapters'
 
-// Image sequence support
-export * from './image-sequence'
+// Image sequence support - exclude names that conflict with thumbnails/cover-art
+export {
+  type ImageFormat, type ImageSequenceReaderOptions, type ImageSequenceWriterOptions,
+  type SequenceFrame, type ImageSequenceInfo, type PatternMatch,
+  SEQUENCE_PATTERNS,
+  detectImageFormat as detectImageSequenceFormat,
+  getFormatExtension, parsePattern, generateFilename,
+  extractFrameNumber, detectPattern,
+  findSequenceFrames, findMissingFrames,
+  ImageSequenceReader, ImageSequenceWriter,
+  type SpriteSheetOptions as ImageSpriteSheetOptions,
+  type SpriteSheetInfo,
+  calculateSpriteSheetLayout, getSpritePosition,
+  generateSpriteSheetCss,
+  type InterpolationMethod, type FrameRateConversionOptions,
+  calculateFrameMapping, calculateSimpleFrameMapping,
+  createSequenceFromTimestamps, validateSequence,
+  estimateSequenceSize, formatBytes,
+  getRecommendedSettings,
+} from './image-sequence'
 
-// Metadata reading/writing
-export * from './metadata'
+// Metadata reading/writing - exclude names that conflict with cover-art
+export {
+  type MediaMetadata,
+  COVER_ART_TYPE_IDS, getCoverArtTypeFromId,
+  parseMp4Metadata, createMp4MetadataAtoms,
+  parseId3v2, createId3v2Tag,
+  parseVorbisComments, createVorbisComments,
+  parseFlacPicture as parseFlacPictureMetadata,
+  createFlacPicture,
+  parseMatroskaTags,
+  detectMetadataFormat, parseMetadata,
+  mergeMetadata, formatMetadataSummary,
+  type CoverArt as MetadataCoverArt,
+  type CoverArtType as MetadataCoverArtType,
+} from './metadata'
 
 // Media validation
 export * from './validation'
 
-// Subtitle support (SRT, VTT, ASS, TTML)
-export * from './subtitles'
+// Subtitle support (SRT, VTT, ASS, TTML) - exclude names that conflict with types
+export {
+  type SubtitleCue as SubtitleFileCue,
+  type SubtitleTrack as SubtitleFileTrack,
+  type SubtitleFormat, type SubtitleStyle, type SubtitlePosition,
+  type AssStyle,
+  parseSrt, generateSrt,
+  parseVtt, generateVtt,
+  parseAss, generateAss,
+  parseTtml, generateTtml,
+  parseSubtitles, generateSubtitles,
+  detectSubtitleFormat,
+  convertSubtitles,
+  shiftSubtitles, scaleSubtitles,
+  mergeSubtitles, filterSubtitlesByTime,
+  splitLongCues, stripFormatting,
+  findCueAtTime, getSubtitleStats,
+} from './subtitles'
 
 // Loudness normalization (EBU R128)
 export * from './loudness'
@@ -99,8 +153,21 @@ export * from './quality-metrics'
 // Encoding presets for social media platforms
 export * from './presets'
 
-// Concatenation and splitting utilities
-export * from './concat-split'
+// Concatenation and splitting utilities - exclude formatTimestamp that conflicts with scene-detection
+export {
+  type SplitSegment, type SplitOptions, type ConcatOptions,
+  type ConcatInput, type ConcatPlan,
+  type BatchSplitPlan,
+  calculateSplitPoints, formatSegmentFilename,
+  alignToKeyframes, mergeShortSegments,
+  createConcatPlan, generateConcatList,
+  calculateOutputDimensions, calculateTrimWithFade,
+  extractSubclip, parseTimestamp,
+  formatTimestamp as formatConcatTimestamp,
+  createBatchSplitPlans, estimateSplitSizes,
+  validateSegmentCoverage, calculateConcatDuration,
+  segmentsToChapters, calculateSeekPosition,
+} from './concat-split'
 
 // GIF generation (using ts-gif)
 export * from './gif'
@@ -108,36 +175,28 @@ export * from './gif'
 // Interlace detection
 export * from './interlace'
 
-// HDR to SDR conversion
-export * from './hdr-sdr'
+// HDR to SDR conversion - exclude names that conflict with color.ts and types.ts
+export {
+  type HdrMetadata as HdrSdrMetadata,
+  type MasteringDisplayMetadata as HdrSdrMasteringDisplayMetadata,
+  type ColorSpace as HdrColorSpace,
+  type TransferFunction, type ColorPrimaries as HdrColorPrimaries,
+  type ToneMappingAlgorithm, type ToneMappingOptions,
+  type GamutMappingMethod, type ConversionOptions as HdrConversionOptions,
+  type ConversionResult,
+  pqToLinear, linearToPq, hlgToLinear, linearToHlg,
+  gammaToLinear, linearToGamma, srgbToLinear, linearToSrgb,
+  toneMappingReinhard, toneMappingReinhardExtended,
+  toneMappingHable, applyHableToneMapping,
+  toneMappingAces, toneMappingAcesFitted,
+  toneMappingBt2390, toneMappingMobius,
+  applyToneMapping,
+  bt2020ToBt709, bt709ToXyz, xyzToBt709, bt2020ToXyz, xyzToBt2020,
+  applyGamutMapping,
+  HdrToSdrConverter,
+  detectHdrFormat as detectHdrSdrFormat,
+  getHdrToSdrFilter, getConversionDescription,
+} from './hdr-sdr'
 
 // Batch processing
 export * from './batch'
-
-// Re-export audio utilities from ts-audio
-export {
-  // Audio types
-  type AudioCodec,
-  type AudioTrack,
-  type AudioMetadata,
-  type AudioFrame,
-  type SampleFormat,
-  type ChannelLayout,
-  // Audio utilities
-  formatSampleRate,
-  getChannelLayoutName,
-  floatToInt16,
-  int16ToFloat,
-  interleaveChannels,
-  deinterleaveChannels,
-  calculateRMS,
-  calculatePeak,
-  dbToLinear,
-  linearToDb,
-  applyGain,
-  mixBuffers,
-  normalize,
-  fadeIn,
-  fadeOut,
-  resampleLinear,
-} from 'ts-audio'

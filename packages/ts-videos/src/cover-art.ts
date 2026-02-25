@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Cover art extraction and handling utilities
  * Similar to mediabunny's cover art system
@@ -323,11 +324,11 @@ export function parseId3Apic(frameData: Uint8Array): CoverArt | null {
   // MIME type (null-terminated)
   let mimeEnd = offset
   while (mimeEnd < frameData.length && frameData[mimeEnd] !== 0) mimeEnd++
-  const mimeType = new TextDecoder('ascii').decode(frameData.subarray(offset, mimeEnd))
+  const mimeType = new TextDecoder('ascii' as never).decode(frameData.subarray(offset, mimeEnd))
   offset = mimeEnd + 1
 
   // Picture type
-  const pictureType = frameData[offset++] as CoverArtType
+    const pictureType = frameData[offset++] as CoverArtType
 
   // Description (null-terminated, encoding-dependent)
   let descEnd = offset
@@ -344,7 +345,7 @@ export function parseId3Apic(frameData: Uint8Array): CoverArt | null {
   }
 
   const description = isUtf16
-    ? new TextDecoder(encoding === 1 ? 'utf-16le' : 'utf-16be').decode(frameData.subarray(offset, descEnd - 2))
+    ? new TextDecoder((encoding === 1 ? 'utf-16le' : 'utf-16be') as never).decode(frameData.subarray(offset, descEnd - 2))
     : new TextDecoder('utf-8').decode(frameData.subarray(offset, descEnd - 1))
   offset = descEnd
 
@@ -380,7 +381,7 @@ export function parseFlacPicture(blockData: Uint8Array): CoverArt | null {
   offset += 4
 
   // MIME type
-  const mimeType = new TextDecoder('ascii').decode(blockData.subarray(offset, offset + mimeLength))
+  const mimeType = new TextDecoder('ascii' as never).decode(blockData.subarray(offset, offset + mimeLength))
   offset += mimeLength
 
   // Description length (32-bit BE)

@@ -155,7 +155,7 @@ export const CODEC_IDS = {
   WEBVTT_METADATA: 'D_WEBVTT/METADATA',
 }
 
-export const CONTAINER_ELEMENTS = new Set([
+export const CONTAINER_ELEMENTS: Set<number> = new Set([
   EBML_IDS.EBML,
   EBML_IDS.Segment,
   EBML_IDS.SeekHead,

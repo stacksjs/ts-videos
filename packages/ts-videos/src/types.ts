@@ -300,12 +300,172 @@ export interface VideosConfig {
 
 export type VideosOptions = Partial<VideosConfig>
 
+// Web platform API type augmentations
+// Only declare interfaces (for merging) - classes/types that may already
+// exist in the runtime (bun) are augmented via interface merging
 declare global {
+  // Augment VideoFrame with properties used in this codebase
   interface VideoFrame {
+    close(): void
+    readonly displayWidth: number
+    readonly displayHeight: number
+    readonly timestamp: number
+    readonly duration: number
+  }
+
+  // Augment AudioData with properties used in this codebase
+  interface AudioData {
+    close(): void
+    readonly numberOfChannels: number
+    readonly numberOfFrames: number
+    readonly sampleRate: number
+    readonly timestamp: number
+    readonly duration: number
+    copyTo(destination: ArrayBuffer | ArrayBufferView, options: { planeIndex: number, format?: string }): void
+  }
+
+  interface VideoDecoderConfig {
+    codec: string
+    codedWidth?: number
+    codedHeight?: number
+    description?: ArrayBuffer | ArrayBufferView
+    hardwareAcceleration?: string
+  }
+
+  interface AudioDecoderConfig {
+    codec: string
+    sampleRate?: number
+    numberOfChannels?: number
+    description?: ArrayBuffer | ArrayBufferView
+  }
+
+  // Canvas and rendering types - only add members not already in bun's types
+  // OffscreenCanvasRenderingContext2D is already declared by bun, so we only
+  // merge additional members here (avoid re-declaring properties with incompatible types)
+  interface OffscreenCanvasRenderingContext2D {
+    filter: string
+    imageSmoothingEnabled: boolean
+    imageSmoothingQuality: string
+  }
+
+  interface CanvasGradient {
+    addColorStop(offset: number, color: string): void
+  }
+
+  interface CanvasPattern {}
+
+  interface TextMetrics {
+    width: number
+  }
+
+  interface ImageData {
+    readonly data: Uint8ClampedArray
+    readonly width: number
+    readonly height: number
+  }
+
+  interface ImageBitmap {
+    readonly width: number
+    readonly height: number
     close(): void
   }
 
-  interface AudioData {
-    close(): void
+  interface HTMLCanvasElement {
+    width: number
+    height: number
+    getContext(contextId: string, options?: unknown): unknown
   }
+
+  interface HTMLImageElement {
+    src: string
+    width: number
+    height: number
+    readonly naturalWidth: number
+    readonly naturalHeight: number
+  }
+
+  interface CanvasRenderingContext2D extends OffscreenCanvasRenderingContext2D {}
+
+  interface Blob {
+    readonly size: number
+    readonly type: string
+    arrayBuffer(): Promise<ArrayBuffer>
+    slice(start?: number, end?: number, contentType?: string): Blob
+    text(): Promise<string>
+    stream(): ReadableStream<Uint8Array>
+  }
+
+  interface MediaStreamTrack {
+    readonly kind: string
+    readonly id: string
+    readonly label: string
+    readonly enabled: boolean
+    readonly muted: boolean
+    stop(): void
+  }
+
+  interface BaseAudioContext {
+    readonly sampleRate: number
+    readonly currentTime: number
+    decodeAudioData(audioData: ArrayBuffer): Promise<AudioBuffer>
+    createBuffer(numberOfChannels: number, length: number, sampleRate: number): AudioBuffer
+  }
+
+  interface AudioBuffer {
+    readonly sampleRate: number
+    readonly length: number
+    readonly numberOfChannels: number
+    readonly duration: number
+    getChannelData(channel: number): Float32Array
+    copyFromChannel(destination: Float32Array, channelNumber: number, startInChannel?: number): void
+    copyToChannel(source: Float32Array, channelNumber: number, startInChannel?: number): void
+  }
+
+  // VideoColorSpaceInit and VideoColorSpace are already declared by bun
+
+  // Declare var for runtime constructors used with instanceof or new
+  var VideoFrame: {
+    new(source: unknown, init?: { timestamp: number, duration?: number, displayWidth?: number, displayHeight?: number }): VideoFrame
+    prototype: VideoFrame
+  }
+
+  var AudioData: {
+    new(init: { format: string, sampleRate: number, numberOfFrames: number, numberOfChannels: number, timestamp: number, data: ArrayBuffer | ArrayBufferView }): AudioData
+    prototype: AudioData
+  }
+
+  // VideoDecoder, EncodedVideoChunk, EncodedAudioChunk,
+  // OffscreenCanvas are already declared by bun's built-in types
+
+  // AudioDecoder is NOT in bun's types, so we declare it here
+  interface AudioDecoder {
+    configure(config: AudioDecoderConfig): void
+    decode(chunk: unknown): void
+    flush(): Promise<void>
+    close(): void
+    readonly state: string
+  }
+
+  var AudioDecoder: {
+    new(init: { output: (data: AudioData) => void, error: (e: Error) => void }): AudioDecoder
+  }
+
+  var ImageBitmap: {
+    new(...args: unknown[]): ImageBitmap
+    prototype: ImageBitmap
+  }
+
+  var HTMLCanvasElement: {
+    new(): HTMLCanvasElement
+    prototype: HTMLCanvasElement
+  }
+
+  var HTMLImageElement: {
+    new(): HTMLImageElement
+    prototype: HTMLImageElement
+  }
+
+  // VideoColorSpace var is already declared by bun
+
+  function createImageBitmap(image: Blob | ImageData | ImageBitmap | OffscreenCanvas): Promise<ImageBitmap>
 }

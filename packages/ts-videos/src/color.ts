@@ -171,14 +171,14 @@ export function detectHdrFormat(colorSpace: ColorSpaceInfo): HdrFormat {
   // SDR checks
   if (colorSpace.primaries === ColorPrimaries.BT709 &&
       (colorSpace.transfer === TransferCharacteristics.BT709 ||
-       colorSpace.transfer === TransferCharacteristics.IEC61966_2_1)) {
+        colorSpace.transfer === TransferCharacteristics.IEC61966_2_1)) {
     return HdrFormat.SDR
   }
 
   // BT.2020 without HDR transfer is wide color gamut SDR
   if (colorSpace.primaries === ColorPrimaries.BT2020 &&
       colorSpace.transfer !== TransferCharacteristics.SMPTEST2084 &&
-      colorSpace.transfer !== TransferCharacteristics.ARIB_STD_B67) {
+      (colorSpace.transfer as TransferCharacteristics) !== TransferCharacteristics.ARIB_STD_B67) {
     return HdrFormat.SDR
   }
 
@@ -198,7 +198,7 @@ export function isHdr(colorSpace: ColorSpaceInfo): boolean {
  */
 export function isWideColorGamut(colorSpace: ColorSpaceInfo): boolean {
   return colorSpace.primaries === ColorPrimaries.BT2020 ||
-         colorSpace.primaries === ColorPrimaries.SMPTEST431 ||
+    colorSpace.primaries === ColorPrimaries.SMPTEST431 ||
          colorSpace.primaries === ColorPrimaries.SMPTEST432
 }
 

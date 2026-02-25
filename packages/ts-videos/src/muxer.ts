@@ -33,7 +33,7 @@ export abstract class Muxer {
   protected target: Target
   protected tracks: OutputTrack[] = []
   protected nextTrackId = 1
-  protected mutex = new AsyncMutex()
+  protected mutex: AsyncMutex = new AsyncMutex()
   protected started = false
   protected finalized = false
   protected metadata: Metadata = {}

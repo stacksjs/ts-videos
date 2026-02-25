@@ -78,7 +78,7 @@ export class EncodedPacketSink implements Sink<EncodedPacket> {
     return null
   }
 
-  async *items(start = 0, end = Infinity): AsyncGenerator<EncodedPacket> {
+  async *items(start: number = 0, end: number = Infinity): AsyncGenerator<EncodedPacket> {
     for (const packet of this.packets) {
       if (packet.timestamp >= start && packet.timestamp <= end) {
         yield packet
@@ -188,7 +188,7 @@ export class VideoSampleSink implements Sink<VideoSample> {
     return null
   }
 
-  async *items(start = 0, end = Infinity): AsyncGenerator<VideoSample> {
+  async *items(start: number = 0, end: number = Infinity): AsyncGenerator<VideoSample> {
     for await (const packet of this.packetSource) {
       if (packet.timestamp < start) continue
       if (packet.timestamp > end) break
@@ -326,7 +326,7 @@ export class AudioSampleSink implements Sink<AudioSample> {
     }
   }
 
-  async *items(start = 0, end = Infinity): AsyncGenerator<AudioSample> {
+  async *items(start: number = 0, end: number = Infinity): AsyncGenerator<AudioSample> {
     for await (const packet of this.packetSource) {
       if (packet.timestamp < start) continue
       if (packet.timestamp > end) break
@@ -407,7 +407,7 @@ export class CanvasSink {
     return canvas
   }
 
-  async *canvases(start = 0, end = Infinity): AsyncGenerator<{ canvas: OffscreenCanvas, timestamp: number }> {
+  async *canvases(start: number = 0, end: number = Infinity): AsyncGenerator<{ canvas: OffscreenCanvas, timestamp: number }> {
     for await (const sample of this.videoSink.items(start, end)) {
       if (!(sample.data instanceof VideoFrame)) continue
 
@@ -496,7 +496,7 @@ export class AudioBufferSink {
     return buffer
   }
 
-  async *buffers(start = 0, end = Infinity): AsyncGenerator<{ buffer: AudioBuffer, timestamp: number }> {
+  async *buffers(start: number = 0, end: number = Infinity): AsyncGenerator<{ buffer: AudioBuffer, timestamp: number }> {
     if (!this.audioContext) {
       throw new Error('AudioContext required')
     }

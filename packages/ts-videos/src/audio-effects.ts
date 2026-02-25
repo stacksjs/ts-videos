@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Audio effects for processing audio samples
  * Provides EQ, compressor, limiter, reverb, delay, and pitch shifting
@@ -756,7 +757,26 @@ export class EffectChain {
 /**
  * Convenience functions for creating effects
  */
-export const Effects = {
+export const Effects: {
+  eq: (bands: EqBand[]) => Equalizer
+  compressor: (options?: CompressorOptions) => Compressor
+  limiter: (options?: { threshold?: number; release?: number }) => Limiter
+  reverb: (options?: { roomSize?: number; damping?: number; wet?: number; dry?: number }) => Reverb
+  delay: (delayTime?: number, feedback?: number, wet?: number) => Delay
+  pitchShift: (semitones: number) => PitchShifter
+  timeStretch: (speed: number) => TimeStretch
+  gain: (db: number) => Gain
+  lowpass: (frequency: number, q?: number) => BiquadFilter
+  highpass: (frequency: number, q?: number) => BiquadFilter
+  bandpass: (frequency: number, q?: number) => BiquadFilter
+  notch: (frequency: number, q?: number) => BiquadFilter
+  lowshelf: (frequency: number, gain: number) => BiquadFilter
+  highshelf: (frequency: number, gain: number) => BiquadFilter
+  peaking: (frequency: number, gain: number, q?: number) => BiquadFilter
+  bassBoost: () => Equalizer
+  trebleBoost: () => Equalizer
+  voiceEnhance: () => Equalizer
+} = {
   eq: (bands: EqBand[]) => new Equalizer(bands),
   compressor: (options?: CompressorOptions) => new Compressor(options),
   limiter: (options?: { threshold?: number; release?: number }) => new Limiter(options),

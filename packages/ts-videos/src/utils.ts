@@ -291,4 +291,4 @@ export function detectEndianness(): 'little' | 'big' {
   return new Int16Array(buffer)[0] === 256 ? 'little' : 'big'
 }
 
-export const isLittleEndian = detectEndianness() === 'little'
+export const isLittleEndian: boolean = detectEndianness() === 'little'

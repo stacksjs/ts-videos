@@ -217,11 +217,11 @@ export class StreamSource implements Source {
     if (this.done) return
 
     if (!this.reader) {
-      this.reader = this.stream.getReader()
+      this.reader = this.stream.getReader() as ReadableStreamDefaultReader<Uint8Array>
     }
 
     while (this.totalBytesRead < targetOffset && !this.done) {
-      const { value, done } = await this.reader.read()
+      const { value, done } = await this.reader!.read()
       if (done) {
         this.done = true
         break

@@ -242,9 +242,11 @@ export class MediaStreamVideoTrackSource implements MediaSource<VideoSample> {
     const processor = new MediaStreamTrackProcessor({ track: this.track })
     this.reader = processor.readable.getReader()
 
+    const reader = this.reader!
+
     try {
       while (!this.stopped) {
-        const { value, done } = await this.reader.read()
+        const { value, done } = await reader.read()
         if (done) break
         if (value) {
           yield {
@@ -256,7 +258,7 @@ export class MediaStreamVideoTrackSource implements MediaSource<VideoSample> {
       }
     }
     finally {
-      this.reader.releaseLock()
+      reader.releaseLock()
     }
   }
 
@@ -291,9 +293,11 @@ export class MediaStreamAudioTrackSource implements MediaSource<AudioSample> {
     const processor = new MediaStreamTrackProcessor({ track: this.track })
     this.reader = processor.readable.getReader()
 
+    const reader = this.reader!
+
     try {
       while (!this.stopped) {
-        const { value, done } = await this.reader.read()
+        const { value, done } = await reader.read()
         if (done) break
         if (value) {
           // Convert AudioData to Float32Array
@@ -322,7 +326,7 @@ export class MediaStreamAudioTrackSource implements MediaSource<AudioSample> {
       }
     }
     finally {
-      this.reader?.releaseLock()
+      reader.releaseLock()
     }
   }
 
@@ -404,9 +408,9 @@ export class TextSubtitleSource implements MediaSource<SubtitleCue> {
       if (!timeMatch) continue
 
       const startTime = Number(timeMatch[1]) * 3600 + Number(timeMatch[2]) * 60 +
-                       Number(timeMatch[3]) + Number(timeMatch[4]) / 1000
+        Number(timeMatch[3]) + Number(timeMatch[4]) / 1000
       const endTime = Number(timeMatch[5]) * 3600 + Number(timeMatch[6]) * 60 +
-                     Number(timeMatch[7]) + Number(timeMatch[8]) / 1000
+        Number(timeMatch[7]) + Number(timeMatch[8]) / 1000
 
       const text = lines.slice(2).join('\n')
 
@@ -435,9 +439,9 @@ export class TextSubtitleSource implements MediaSource<SubtitleCue> {
         const timeMatch = line.match(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})(.*)/)
         if (timeMatch) {
           const startTime = Number(timeMatch[1]) * 3600 + Number(timeMatch[2]) * 60 +
-                           Number(timeMatch[3]) + Number(timeMatch[4]) / 1000
+            Number(timeMatch[3]) + Number(timeMatch[4]) / 1000
           const endTime = Number(timeMatch[5]) * 3600 + Number(timeMatch[6]) * 60 +
-                         Number(timeMatch[7]) + Number(timeMatch[8]) / 1000
+            Number(timeMatch[7]) + Number(timeMatch[8]) / 1000
           const settings = timeMatch[9]?.trim()
 
           // Collect text lines

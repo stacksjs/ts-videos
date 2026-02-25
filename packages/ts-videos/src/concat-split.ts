@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Concatenation and splitting utilities for media files
  * Join multiple files or split files at specific points

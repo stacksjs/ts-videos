@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Video quality metrics
  * Implements PSNR, SSIM, and related quality assessment algorithms

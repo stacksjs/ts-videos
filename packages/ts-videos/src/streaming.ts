@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Streaming enhancements for media processing
  * Provides append-only modes, chunked output, and streaming utilities
@@ -178,7 +179,7 @@ export class ChunkedStreamWriter {
     let offset = 0
 
     for (const chunk of this.currentChunkData) {
-      data.set(_chunk, offset)
+      data.set(chunk, offset)
       offset += chunk.byteLength
     }
 
@@ -192,10 +193,10 @@ export class ChunkedStreamWriter {
       startsWithKeyframe: this.hasKeyframe,
     }
 
-    this.chunks.push(_chunk)
+    this.chunks.push(chunk)
 
     if (this.callback) {
-      await this.callback(_chunk)
+      await this.callback(chunk)
     }
 
     // Reset for next chunk
@@ -296,7 +297,7 @@ export class AppendableBuffer {
     let offset = 0
 
     for (const chunk of this.chunks) {
-      result.set(_chunk, offset)
+      result.set(chunk, offset)
       offset += chunk.byteLength
     }
 
@@ -426,7 +427,7 @@ export class AsyncQueue<T> {
   private closed = false
   private maxSize: number
 
-  constructor(maxSize = Infinity) {
+  constructor(maxSize: number = Infinity) {
     this.maxSize = maxSize
   }
 

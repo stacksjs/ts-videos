@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line */
 /**
  * Loudness measurement and normalization
  * Implements EBU R128 / ITU-R BS.1770 standards
@@ -60,7 +61,7 @@ const HP_FILTER_48K = {
 }
 
 /** Calculate K-weighting filter coefficients for a given sample rate */
-export function calculateKWeightingCoeffs(_sampleRate: number): {
+export function calculateKWeightingCoeffs(sampleRate: number): {
   preFilter: { b: number[]; a: number[] }
   hpFilter: { b: number[]; a: number[] }
 } {
@@ -115,8 +116,8 @@ export function applyBiquadFilter(
 }
 
 /** Apply K-weighting filter to audio samples */
-export function applyKWeighting(samples: Float32Array, _sampleRate: number): Float32Array {
-  const coeffs = calculateKWeightingCoeffs(_sampleRate)
+export function applyKWeighting(samples: Float32Array, sampleRate: number): Float32Array {
+  const coeffs = calculateKWeightingCoeffs(sampleRate)
 
   // Apply pre-filter (high shelf)
   let filtered = applyBiquadFilter(samples, coeffs.preFilter.b, coeffs.preFilter.a)
@@ -232,7 +233,7 @@ export function measureIntegratedLoudness(
   const sampleCount = channels[0].length
 
   // Pre-filter all channels
-  const filteredChannels = channels.map((ch) => applyKWeighting(ch, _sampleRate))
+  const filteredChannels = channels.map((ch) => applyKWeighting(ch, sampleRate))
 
   // Calculate block loudness
   const blockLoudness: number[] = []
@@ -293,7 +294,7 @@ export function measureLoudnessRange(
   const hopSize = Math.floor(sampleRate * 1) // 1s overlap
 
   // Pre-filter all channels
-  const filteredChannels = channels.map((ch) => applyKWeighting(ch, _sampleRate))
+  const filteredChannels = channels.map((ch) => applyKWeighting(ch, sampleRate))
 
   // Calculate short-term loudness values
   const shortTermValues: number[] = []
@@ -336,7 +337,7 @@ export function measureLoudnessRange(
 }
 
 /** Measure true peak using oversampling */
-export function measureTruePeak(samples: Float32Array, _sampleRate: number): number {
+export function measureTruePeak(samples: Float32Array, sampleRate: number): number {
   // Simple 4x oversampling with linear interpolation
   // A full implementation would use sinc interpolation
   const oversampleFactor = 4
@@ -383,17 +384,17 @@ export function analyzeLoudness(
   sampleRate: number,
 ): LoudnessResult {
   // Measure integrated loudness
-  const { integrated } = measureIntegratedLoudness(channels, _sampleRate)
+  const { integrated } = measureIntegratedLoudness(channels, sampleRate)
 
   // Measure loudness range
-  const range = measureLoudnessRange(channels, _sampleRate)
+  const range = measureLoudnessRange(channels, sampleRate)
 
   // Measure peaks
   let truePeak = -Infinity
   let samplePeak = -Infinity
 
   for (const channel of channels) {
-    const tp = measureTruePeak(channel, _sampleRate)
+    const tp = measureTruePeak(channel, sampleRate)
     const sp = measureSamplePeak(channel)
     if (tp > truePeak) truePeak = tp
     if (sp > samplePeak) samplePeak = sp
@@ -405,7 +406,7 @@ export function analyzeLoudness(
   const hopSize100ms = Math.floor(sampleRate * 0.1)
 
   for (let offset = 0; offset + windowSize400ms <= channels[0].length; offset += hopSize100ms) {
-    momentary.push(measureMomentaryLoudness(channels, _sampleRate, offset))
+    momentary.push(measureMomentaryLoudness(channels, sampleRate, offset))
   }
 
   // Calculate short-term loudness over time
@@ -414,7 +415,7 @@ export function analyzeLoudness(
   const hopSize1s = Math.floor(sampleRate * 1)
 
   for (let offset = 0; offset + windowSize3s <= channels[0].length; offset += hopSize1s) {
-    shortTerm.push(measureShortTermLoudness(channels, _sampleRate, offset))
+    shortTerm.push(measureShortTermLoudness(channels, sampleRate, offset))
   }
 
   return {
@@ -493,11 +494,11 @@ export function applyGain(samples: Float32Array, gainDb: number): Float32Array {
 /** Normalize audio to target loudness */
 export function normalizeLoudness(
   channels: Float32Array[],
-  _sampleRate: number,
+  sampleRate: number,
   options: LoudnessNormOptions = {},
 ): { channels: Float32Array[]; gainApplied: number; before: LoudnessResult; after: LoudnessResult } {
   // Analyze current loudness
-  const before = analyzeLoudness(channels, _sampleRate)
+  const before = analyzeLoudness(channels, sampleRate)
 
   // Calculate required gain
   const gainDb = calculateNormalizationGain(before.integrated, before.truePeak, options)
@@ -506,7 +507,7 @@ export function normalizeLoudness(
   const normalizedChannels = channels.map((ch) => applyGain(ch, gainDb))
 
   // Analyze after normalization
-  const after = analyzeLoudness(normalizedChannels, _sampleRate)
+  const after = analyzeLoudness(normalizedChannels, sampleRate)
 
   return {
     channels: normalizedChannels,
@@ -534,7 +535,7 @@ export class LoudnessMeter {
   private momentaryHistory: number[] = []
   private shortTermHistory: number[] = []
 
-  constructor(_sampleRate: number, channelCount: number) {
+  constructor(sampleRate: number, channelCount: number) {
     this.sampleRate = sampleRate
     this.channelCount = channelCount
     this.windowSize400ms = Math.floor(sampleRate * 0.4)
