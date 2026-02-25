@@ -311,7 +311,8 @@ export class Compressor implements AudioEffect {
       const targetEnvelope = gainReduction
       if (targetEnvelope > this.envelope) {
         this.envelope = attackCoef * this.envelope + (1 - attackCoef) * targetEnvelope
-      } else {
+      }
+      else {
         this.envelope = releaseCoef * this.envelope + (1 - releaseCoef) * targetEnvelope
       }
 
@@ -365,7 +366,8 @@ export class Limiter implements AudioEffect {
       // Envelope
       if (gainReduction < this.envelope) {
         this.envelope = gainReduction
-      } else {
+      }
+      else {
         this.envelope = releaseCoef * this.envelope + (1 - releaseCoef) * gainReduction
       }
 
@@ -591,7 +593,7 @@ export class PitchShifter implements AudioEffect {
 
   process(samples: Float32Array, sampleRate: number, channels: number): Float32Array {
     const grainSamples = Math.round((this.grainSize / 1000) * sampleRate) * channels
-    const hopSize = Math.round(grainSamples * (1 - this.overlap))
+    const _hopSize = Math.round(grainSamples * (1 - this.overlap))
 
     if (!this.buffer || this.buffer.length < grainSamples * 4) {
       this.buffer = new Float32Array(grainSamples * 4)
@@ -624,7 +626,8 @@ export class PitchShifter implements AudioEffect {
       const diff = this.writePosition - this.readPosition
       if (diff > this.buffer.length / 2) {
         this.readPosition = this.writePosition - this.buffer.length / 4
-      } else if (diff < this.buffer.length / 4) {
+      }
+      else if (diff < this.buffer.length / 4) {
         this.readPosition = this.writePosition - this.buffer.length / 2
       }
     }
@@ -665,7 +668,8 @@ export class TimeStretch implements AudioEffect {
 
       if (srcIdx + 1 < samples.length) {
         output[i] = samples[srcIdx] * (1 - frac) + samples[srcIdx + 1] * frac
-      } else if (srcIdx < samples.length) {
+      }
+      else if (srcIdx < samples.length) {
         output[i] = samples[srcIdx]
       }
     }

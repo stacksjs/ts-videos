@@ -289,7 +289,8 @@ export function parseH264Sps(data: Uint8Array): H264Sps {
 
   if (picOrderCntType === 0) {
     log2MaxPicOrderCntLsb = readUe(reader) + 4
-  } else if (picOrderCntType === 1) {
+  }
+  else if (picOrderCntType === 1) {
     deltaPicOrderAlwaysZeroFlag = reader.readBits(1) === 1
     offsetForNonRefPic = readSe(reader)
     offsetForTopToBottomField = readSe(reader)
@@ -349,7 +350,8 @@ export function parseH264Sps(data: Uint8Array): H264Sps {
     if (vui.aspectRatioIdc === EXTENDED_SAR) {
       sarWidth = vui.sarWidth ?? 1
       sarHeight = vui.sarHeight ?? 1
-    } else if (vui.aspectRatioIdc !== undefined && vui.aspectRatioIdc < ASPECT_RATIO_IDC_TABLE.length) {
+    }
+    else if (vui.aspectRatioIdc !== undefined && vui.aspectRatioIdc < ASPECT_RATIO_IDC_TABLE.length) {
       [sarWidth, sarHeight] = ASPECT_RATIO_IDC_TABLE[vui.aspectRatioIdc]
     }
   }
@@ -575,15 +577,18 @@ export function parseH264Pps(data: Uint8Array): H264Pps {
       for (let i = 0; i <= numSliceGroupsMinus1; i++) {
         readUe(reader) // run_length_minus1[i]
       }
-    } else if (sliceGroupMapType === 2) {
+    }
+    else if (sliceGroupMapType === 2) {
       for (let i = 0; i < numSliceGroupsMinus1; i++) {
         readUe(reader) // top_left[i]
         readUe(reader) // bottom_right[i]
       }
-    } else if (sliceGroupMapType === 3 || sliceGroupMapType === 4 || sliceGroupMapType === 5) {
+    }
+    else if (sliceGroupMapType === 3 || sliceGroupMapType === 4 || sliceGroupMapType === 5) {
       reader.readBits(1) // slice_group_change_direction_flag
       readUe(reader) // slice_group_change_rate_minus1
-    } else if (sliceGroupMapType === 6) {
+    }
+    else if (sliceGroupMapType === 6) {
       const picSizeInMapUnits = readUe(reader) + 1
       const bits = Math.ceil(Math.log2(numSliceGroupsMinus1 + 1))
       for (let i = 0; i < picSizeInMapUnits; i++) {
@@ -1187,7 +1192,7 @@ export function parseH265Pps(data: Uint8Array): H265Pps {
 }
 
 /** Parse H.265 Profile/Tier/Level */
-function parseH265ProfileTierLevel(reader: BitstreamReader, profilePresentFlag: boolean, maxSubLayersMinus1: number): H265ProfileTierLevel {
+function parseH265ProfileTierLevel(reader: BitstreamReader, profilePresentFlag: boolean, _maxSubLayersMinus1: number): H265ProfileTierLevel {
   let generalProfileSpace = 0
   let generalTierFlag = false
   let generalProfileIdc = 0
@@ -1248,7 +1253,7 @@ function parseH265ProfileTierLevel(reader: BitstreamReader, profilePresentFlag: 
 }
 
 /** Parse H.265 VUI parameters */
-function parseH265Vui(reader: BitstreamReader, maxSubLayersMinus1: number): H265Vui {
+function parseH265Vui(reader: BitstreamReader, _maxSubLayersMinus1: number): H265Vui {
   const aspectRatioInfoPresentFlag = reader.readBits(1) === 1
   let aspectRatioIdc: number | undefined
   let sarWidth: number | undefined
@@ -1388,8 +1393,9 @@ function parseScalingListData(reader: BitstreamReader): void {
       const scalingListPredModeFlag = reader.readBits(1) === 1
       if (!scalingListPredModeFlag) {
         readUe(reader) // scaling_list_pred_matrix_id_delta
-      } else {
-        let coefNum = Math.min(64, 1 << (4 + (sizeId << 1)))
+      }
+      else {
+        const coefNum = Math.min(64, 1 << (4 + (sizeId << 1)))
         if (sizeId > 1) {
           readSe(reader) // scaling_list_dc_coef_minus8
         }
@@ -1415,7 +1421,8 @@ function parseShortTermRefPicSet(reader: BitstreamReader, stRpsIdx: number, numS
     reader.readBits(1) // delta_rps_sign
     readUe(reader) // abs_delta_rps_minus1
     // Skip the rest - requires previous RPS state
-  } else {
+  }
+  else {
     const numNegativePics = readUe(reader)
     const numPositivePics = readUe(reader)
     for (let i = 0; i < numNegativePics; i++) {
@@ -1610,7 +1617,8 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
 
   if (samplingFrequencyIndex === 15) {
     samplingFrequency = reader.readBits(24)
-  } else {
+  }
+  else {
     samplingFrequency = AAC_SAMPLE_RATES[samplingFrequencyIndex] ?? 0
   }
 
@@ -1634,7 +1642,8 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
     extensionSamplingFrequencyIndex = reader.readBits(4)
     if (extensionSamplingFrequencyIndex === 15) {
       extensionSamplingFrequency = reader.readBits(24)
-    } else {
+    }
+    else {
       extensionSamplingFrequency = AAC_SAMPLE_RATES[extensionSamplingFrequencyIndex] ?? 0
     }
     audioObjectType = reader.readBits(5)
@@ -1687,7 +1696,8 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
           extensionSamplingFrequencyIndex = reader.readBits(4)
           if (extensionSamplingFrequencyIndex === 15) {
             extensionSamplingFrequency = reader.readBits(24)
-          } else {
+          }
+          else {
             extensionSamplingFrequency = AAC_SAMPLE_RATES[extensionSamplingFrequencyIndex] ?? 0
           }
           if (reader.bitsRemaining() >= 12) {
@@ -1697,13 +1707,15 @@ export function parseAacAudioSpecificConfig(data: Uint8Array): AacAudioSpecificC
             }
           }
         }
-      } else if (extensionAudioObjectType === AacObjectType.PS) {
+      }
+      else if (extensionAudioObjectType === AacObjectType.PS) {
         sbrPresentFlag = reader.readBits(1) === 1
         if (sbrPresentFlag) {
           extensionSamplingFrequencyIndex = reader.readBits(4)
           if (extensionSamplingFrequencyIndex === 15) {
             extensionSamplingFrequency = reader.readBits(24)
-          } else {
+          }
+          else {
             extensionSamplingFrequency = AAC_SAMPLE_RATES[extensionSamplingFrequencyIndex] ?? 0
           }
         }
@@ -1830,12 +1842,14 @@ export function createAacAudioSpecificConfig(
   if (audioObjectType >= 31) {
     bytes.push(0xf8 | (((audioObjectType - 32) >> 3) & 0x07))
     bytes.push((((audioObjectType - 32) & 0x07) << 5) | (samplingFrequencyIndex >= 15 ? 0x1e : samplingFrequencyIndex << 1) | (channelConfiguration >> 3))
-  } else {
+  }
+  else {
     bytes.push((audioObjectType << 3) | (samplingFrequencyIndex >= 15 ? 0x07 : samplingFrequencyIndex >> 1))
     if (samplingFrequencyIndex >= 15) {
       // Need to add 24-bit sampling frequency - handled separately
       bytes.push((channelConfiguration << 3))
-    } else {
+    }
+    else {
       bytes.push(((samplingFrequencyIndex & 0x01) << 7) | (channelConfiguration << 3))
     }
   }
@@ -1868,7 +1882,8 @@ export function splitAnnexBNalUnits(data: Uint8Array): Uint8Array[] {
         }
         start = i + 3
         i += 3
-      } else if (i < data.length - 3 && data[i + 2] === 0 && data[i + 3] === 1) {
+      }
+      else if (i < data.length - 3 && data[i + 2] === 0 && data[i + 3] === 1) {
         // Found 4-byte start code
         if (i > start) {
           let end = i
@@ -1879,10 +1894,12 @@ export function splitAnnexBNalUnits(data: Uint8Array): Uint8Array[] {
         }
         start = i + 4
         i += 4
-      } else {
+      }
+      else {
         i++
       }
-    } else {
+    }
+    else {
       i++
     }
   }
@@ -1915,10 +1932,12 @@ export function annexBToAvcc(data: Uint8Array, lengthSize: number = 4): Uint8Arr
       result[offset++] = (len >> 16) & 0xff
       result[offset++] = (len >> 8) & 0xff
       result[offset++] = len & 0xff
-    } else if (lengthSize === 2) {
+    }
+    else if (lengthSize === 2) {
       result[offset++] = (len >> 8) & 0xff
       result[offset++] = len & 0xff
-    } else if (lengthSize === 1) {
+    }
+    else if (lengthSize === 1) {
       result[offset++] = len & 0xff
     }
     result.set(nal, offset)
@@ -1937,9 +1956,11 @@ export function avccToAnnexB(data: Uint8Array, lengthSize: number = 4): Uint8Arr
     let len = 0
     if (lengthSize === 4) {
       len = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    } else if (lengthSize === 2) {
+    }
+    else if (lengthSize === 2) {
       len = (data[offset] << 8) | data[offset + 1]
-    } else if (lengthSize === 1) {
+    }
+    else if (lengthSize === 1) {
       len = data[offset]
     }
     offset += lengthSize
@@ -1947,7 +1968,8 @@ export function avccToAnnexB(data: Uint8Array, lengthSize: number = 4): Uint8Arr
     if (len > 0 && offset + len <= data.length) {
       nalUnits.push(data.slice(offset, offset + len))
       offset += len
-    } else {
+    }
+    else {
       break
     }
   }
@@ -1980,7 +2002,7 @@ export function getH264NalType(nalHeader: number): number {
 }
 
 /** Get H.265 NAL type from first two NAL header bytes */
-export function getH265NalType(nalHeader0: number, nalHeader1: number): number {
+export function getH265NalType(nalHeader0: number, _nalHeader1: number): number {
   return (nalHeader0 >> 1) & 0x3f
 }
 
@@ -1995,7 +2017,8 @@ export function isKeyframeNal(nalType: number, isHevc: boolean): boolean {
       nalType === H265NalType.BLA_W_RADL ||
       nalType === H265NalType.BLA_N_LP
     )
-  } else {
+  }
+  else {
     return nalType === H264NalType.SLICE_IDR
   }
 }
@@ -2011,7 +2034,8 @@ export function extractH264ParameterSets(data: Uint8Array): { sps: Uint8Array[];
       const nalType = getH264NalType(nal[0])
       if (nalType === H264NalType.SPS) {
         sps.push(nal)
-      } else if (nalType === H264NalType.PPS) {
+      }
+      else if (nalType === H264NalType.PPS) {
         pps.push(nal)
       }
     }
@@ -2032,9 +2056,11 @@ export function extractH265ParameterSets(data: Uint8Array): { vps: Uint8Array[];
       const nalType = getH265NalType(nal[0], nal[1])
       if (nalType === H265NalType.VPS) {
         vps.push(nal)
-      } else if (nalType === H265NalType.SPS) {
+      }
+      else if (nalType === H265NalType.SPS) {
         sps.push(nal)
-      } else if (nalType === H265NalType.PPS) {
+      }
+      else if (nalType === H265NalType.PPS) {
         pps.push(nal)
       }
     }

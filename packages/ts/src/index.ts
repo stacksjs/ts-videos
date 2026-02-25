@@ -10,15 +10,15 @@ import { InputFormat, OutputFormat, Demuxer, Muxer, Reader } from 'ts-videos'
 const TS_PACKET_SIZE = 188
 const TS_SYNC_BYTE = 0x47
 const PAT_PID = 0x0000
-const SDT_PID = 0x0011
-const NULL_PID = 0x1FFF
+const _SDT_PID = 0x0011
+const _NULL_PID = 0x1FFF
 
 // Stream types
 const STREAM_TYPE_MPEG1_VIDEO = 0x01
 const STREAM_TYPE_MPEG2_VIDEO = 0x02
 const STREAM_TYPE_MPEG1_AUDIO = 0x03
 const STREAM_TYPE_MPEG2_AUDIO = 0x04
-const STREAM_TYPE_PRIVATE = 0x06
+const _STREAM_TYPE_PRIVATE = 0x06
 const STREAM_TYPE_AAC = 0x0F
 const STREAM_TYPE_H264 = 0x1B
 const STREAM_TYPE_H265 = 0x24
@@ -231,8 +231,8 @@ function parsePes(data: Uint8Array): { pts?: number, dts?: number, payload: Uint
     return null
   }
 
-  const streamId = data[3]
-  const pesPacketLength = (data[4] << 8) | data[5]
+  const _streamId = data[3]
+  const _pesPacketLength = (data[4] << 8) | data[5]
   const headerDataLength = data[8]
 
   let pts: number | undefined
@@ -321,7 +321,7 @@ export class TsDemuxer extends Demuxer {
 
     // Read in chunks for efficiency
     const chunkSize = TS_PACKET_SIZE * 1000
-    let pmtPids: Set<number> = new Set()
+    const pmtPids: Set<number> = new Set()
 
     while (this.reader.position < fileSize) {
       const chunk = await this.reader.readBytes(Math.min(chunkSize, fileSize - this.reader.position))
@@ -351,7 +351,8 @@ export class TsDemuxer extends Demuxer {
               }
             }
           }
-        } else if (pmtPids.has(packet.pid) && packet.payload) {
+        }
+        else if (pmtPids.has(packet.pid) && packet.payload) {
           const pmt = parsePmt(packet.payload)
           if (pmt) {
             this.pmts.set(packet.pid, pmt)
@@ -368,7 +369,8 @@ export class TsDemuxer extends Demuxer {
               }
             }
           }
-        } else if (this.streams.has(packet.pid) && packet.payload) {
+        }
+        else if (this.streams.has(packet.pid) && packet.payload) {
           const stream = this.streams.get(packet.pid)!
 
           if (packet.payloadUnitStartIndicator) {
@@ -484,7 +486,8 @@ export class TsDemuxer extends Demuxer {
         }
         stream.track = track
         this._tracks.push(track)
-      } else if (isAudioStreamType(stream.streamType)) {
+      }
+      else if (isAudioStreamType(stream.streamType)) {
         const track: AudioTrack = {
           type: 'audio',
           id: trackId++,
@@ -743,7 +746,8 @@ export class TsMuxer extends Muxer {
           tsPacket.fill(0xFF, 6, 4 + stuffingSize)
         }
         tsPacket.set(pesData.subarray(offset, offset + payloadSize), 4 + stuffingSize)
-      } else {
+      }
+      else {
         tsPacket[3] = 0x10 | (this.getNextContinuityCounter(packet.pid) & 0x0F)
         tsPacket.set(pesData.subarray(offset, offset + payloadSize), 4)
       }
@@ -808,7 +812,8 @@ export class TsMuxer extends Muxer {
       for (let i = 0; i < 8; i++) {
         if (((crc >> 31) ^ ((byte >> (7 - i)) & 1)) & 1) {
           crc = (crc << 1) ^ 0x04C11DB7
-        } else {
+        }
+        else {
           crc = crc << 1
         }
       }

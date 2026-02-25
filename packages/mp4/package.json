@@ -26,24 +26,24 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./boxes": {
-      "import": "./dist/boxes.js",
-      "types": "./dist/boxes.d.ts"
+      "types": "./dist/boxes.d.ts",
+      "import": "./dist/boxes.js"
     },
     "./demuxer": {
-      "import": "./dist/demuxer.js",
-      "types": "./dist/demuxer.d.ts"
+      "types": "./dist/demuxer.d.ts",
+      "import": "./dist/demuxer.js"
     },
     "./fragmented": {
-      "import": "./dist/fragmented.js",
-      "types": "./dist/fragmented.d.ts"
+      "types": "./dist/fragmented.d.ts",
+      "import": "./dist/fragmented.js"
     },
     "./muxer": {
-      "import": "./dist/muxer.js",
-      "types": "./dist/muxer.d.ts"
+      "types": "./dist/muxer.d.ts",
+      "import": "./dist/muxer.js"
     }
   },
   "module": "./dist/index.js",

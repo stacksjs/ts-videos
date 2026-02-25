@@ -123,13 +123,15 @@ export function calculateSplitPoints(
           endTime,
           duration: segDuration,
         })
-      } else if (segments.length > 0) {
+      }
+      else if (segments.length > 0) {
         // Merge with previous segment
         segments[segments.length - 1].endTime = endTime
         segments[segments.length - 1].duration = endTime - segments[segments.length - 1].startTime
       }
     }
-  } else if (options.count && options.count > 0) {
+  }
+  else if (options.count && options.count > 0) {
     // Split into N equal segments
     const segmentDuration = duration / options.count
 
@@ -141,7 +143,8 @@ export function calculateSplitPoints(
         duration: Math.min(segmentDuration, duration - i * segmentDuration),
       })
     }
-  } else if (options.duration && options.duration > 0) {
+  }
+  else if (options.duration && options.duration > 0) {
     // Split by duration
     let currentTime = 0
 
@@ -155,7 +158,8 @@ export function calculateSplitPoints(
           endTime: currentTime + segDuration,
           duration: segDuration,
         })
-      } else if (segments.length > 0) {
+      }
+      else if (segments.length > 0) {
         // Extend previous segment
         segments[segments.length - 1].endTime = duration
         segments[segments.length - 1].duration =
@@ -164,7 +168,8 @@ export function calculateSplitPoints(
 
       currentTime += options.duration
     }
-  } else {
+  }
+  else {
     // No split, return single segment
     segments.push({
       index: 0,
@@ -253,7 +258,8 @@ export function mergeShortSegments(
       // Merge with previous
       previous.endTime = current.endTime
       previous.duration = previous.endTime - previous.startTime
-    } else {
+    }
+    else {
       merged.push({ ...current, index: merged.length })
     }
   }
@@ -336,7 +342,8 @@ export function generateConcatList(
       return `file '${escaped}'`
     })
     return lines.join('\n')
-  } else {
+  }
+  else {
     // Simple list
     return filePaths.join('\n')
   }
@@ -433,9 +440,11 @@ export function parseTimestamp(timestamp: string): number {
 
   if (parts.length === 3) {
     return parts[0] * 3600000 + parts[1] * 60000 + parts[2] * 1000
-  } else if (parts.length === 2) {
+  }
+  else if (parts.length === 2) {
     return parts[0] * 60000 + parts[1] * 1000
-  } else if (parts.length === 1) {
+  }
+  else if (parts.length === 1) {
     return parts[0] * 1000
   }
 
@@ -601,7 +610,8 @@ export function calculateSeekPosition(
       if (kf <= timestamp && kf > nearestKeyframe) {
         nearestKeyframe = kf
       }
-    } else {
+    }
+    else {
       if (kf >= timestamp) {
         nearestKeyframe = kf
         break

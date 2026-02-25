@@ -231,7 +231,8 @@ export function detectPattern(filenames: string[]): string | null {
         const numStr = match[2]
         const digits = numStr.length
         return `${prefix}%0${digits}d.${ext}`
-      } else if (match.length === 3) {
+      }
+      else if (match.length === 3) {
         // number + extension
         const numStr = match[1]
         const digits = numStr.length
@@ -531,13 +532,16 @@ export function calculateSpriteSheetLayout(
   if (options.columns && options.rows) {
     columns = options.columns
     rows = options.rows
-  } else if (options.columns) {
+  }
+  else if (options.columns) {
     columns = options.columns
     rows = Math.ceil(frameCount / columns)
-  } else if (options.rows) {
+  }
+  else if (options.rows) {
     rows = options.rows
     columns = Math.ceil(frameCount / rows)
-  } else {
+  }
+  else {
     // Auto-calculate for roughly square layout
     columns = Math.ceil(Math.sqrt(frameCount))
     rows = Math.ceil(frameCount / columns)
@@ -649,7 +653,8 @@ export function calculateFrameMapping(
         targetFrame: i,
         sourceFrame: Math.round(sourceFrameExact) % sourceFrameCount,
       })
-    } else if (method === 'blend' || method === 'motion') {
+    }
+    else if (method === 'blend' || method === 'motion') {
       const sourceFrameLow = Math.floor(sourceFrameExact) % sourceFrameCount
       const sourceFrameHigh = Math.ceil(sourceFrameExact) % sourceFrameCount
       const blend = sourceFrameExact - Math.floor(sourceFrameExact)
@@ -716,7 +721,8 @@ export function validateSequence(
   if (missing.length > 0) {
     if (missing.length <= 10) {
       issues.push(`Missing frames: ${missing.join(', ')}`)
-    } else {
+    }
+    else {
       issues.push(`Missing ${missing.length} frames (first: ${missing[0]}, last: ${missing[missing.length - 1]})`)
     }
   }

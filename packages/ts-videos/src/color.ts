@@ -326,7 +326,7 @@ export function parseDolbyVisionConfig(configData: Uint8Array): Partial<HdrMetad
   const view = new DataView(configData.buffer, configData.byteOffset, configData.byteLength)
 
   const dvVersionMajor = view.getUint8(0)
-  const dvVersionMinor = view.getUint8(1)
+  const _dvVersionMinor = view.getUint8(1)
 
   if (dvVersionMajor !== 1) return null // Unknown version
 

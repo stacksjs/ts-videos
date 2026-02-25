@@ -418,7 +418,8 @@ export class SceneDetector {
           this.sceneChanges.push(sceneChange)
         }
       }
-    } else {
+    }
+    else {
       // First frame - calculate initial histogram
       if (this.options.method === 'histogram' || this.options.method === 'adaptive') {
         this.previousHistogram = calculateHistogram(frame)

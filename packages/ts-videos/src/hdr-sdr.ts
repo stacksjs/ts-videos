@@ -1,3 +1,4 @@
+/* eslint-disable no-super-linear-backtracking, regexp/no-super-linear-backtracking */
 /**
  * HDR to SDR conversion utilities
  *
@@ -489,7 +490,7 @@ export function applyGamutMapping(
     case 'perceptual':
     default: {
       // Perceptual gamut mapping via XYZ
-      const [x, y, z] = bt709ToXyz(r, g, b)
+      const [_x, _y, _z] = bt709ToXyz(r, g, b)
 
       // Scale to fit within displayable range
       const maxComponent = Math.max(r, g, b)
@@ -521,7 +522,7 @@ export class HdrToSdrConverter {
   private options: ConversionOptions
   private metadata: HdrMetadata
 
-  constructor(metadata: HdrMetadata, options: ConversionOptions = {}) {
+  constructor(_metadata: HdrMetadata, options: ConversionOptions = {}) {
     this.metadata = metadata
     this.options = {
       toneMapping: {
@@ -728,7 +729,7 @@ export function detectHdrFormat(
  * Generate FFmpeg filter string for HDR to SDR conversion
  */
 export function getHdrToSdrFilter(
-  metadata: HdrMetadata,
+  _metadata: HdrMetadata,
   options: ToneMappingOptions = {}
 ): string {
   const filters: string[] = []
@@ -765,7 +766,7 @@ export function getHdrToSdrFilter(
 /**
  * Get conversion description for display
  */
-export function getConversionDescription(metadata: HdrMetadata, options: ConversionOptions = {}): string {
+export function getConversionDescription(_metadata: HdrMetadata, options: ConversionOptions = {}): string {
   const parts: string[] = []
 
   parts.push(`Source: ${metadata.colorSpace.toUpperCase()} / ${metadata.transferFunction.toUpperCase()}`)

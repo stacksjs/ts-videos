@@ -116,7 +116,7 @@ export class BatchProcessor<T = unknown> {
   /**
    * Add a job to the batch
    */
-  addJob(input: string, output?: string, jobOptions?: T): string {
+  addJob(_input: string, output?: string, jobOptions?: T): string {
     const id = `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 
     const job: BatchJob<T> = {
@@ -207,7 +207,7 @@ export class BatchProcessor<T = unknown> {
     }
 
     // Process queue with concurrency
-    const results = await this.processQueue(processFn)
+    const _results = await this.processQueue(processFn)
 
     const endTime = Date.now()
     const totalTime = endTime - this.startTime
@@ -475,7 +475,7 @@ export async function createBatchFromDirectory<T = unknown>(
     outputDir?: string
     outputSuffix?: string
     outputExtension?: string
-    jobOptions?: T | ((input: string) => T)
+    jobOptions?: T | ((_input: string) => T)
   } = {}
 ): Promise<BatchProcessor<T>> {
   const files = await findFiles({
@@ -496,7 +496,7 @@ export async function createBatchFromDirectory<T = unknown>(
     )
 
     const jobOptions = typeof options.jobOptions === 'function'
-      ? (options.jobOptions as (input: string) => T)(file)
+      ? (options.jobOptions as (_input: string) => T)(file)
       : options.jobOptions
 
     processor.addJob(file, output, jobOptions)

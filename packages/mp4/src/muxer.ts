@@ -476,7 +476,7 @@ export class Mp4Muxer extends Muxer {
       name = 'SubtitleHandler'
     }
 
-    const nameBytes = new TextEncoder().encode(name + '\0')
+    const nameBytes = new TextEncoder().encode(`${name}\0`)
     const size = 32 + nameBytes.byteLength
 
     await writer.writeU32BE(size)

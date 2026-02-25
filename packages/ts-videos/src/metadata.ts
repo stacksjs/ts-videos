@@ -250,7 +250,8 @@ function parseIlstForMetadata(data: Uint8Array, metadata: MediaMetadata, artwork
         // Cover art
         const art = parseCoverAtom(atomData)
         if (art) artwork.push(art)
-      } else {
+      }
+      else {
         // Other metadata
         const field = ITUNES_ATOMS[type]
         if (field) {
@@ -413,11 +414,13 @@ function createDataAtom(value: string | number | boolean): Uint8Array {
   if (typeof value === 'string') {
     dataType = 1 // UTF-8
     content = new TextEncoder().encode(value)
-  } else if (typeof value === 'number') {
+  }
+  else if (typeof value === 'number') {
     dataType = 21 // Integer
     content = new Uint8Array(4)
     writeUint32BE(content, 0, value)
-  } else {
+  }
+  else {
     dataType = 1
     content = new TextEncoder().encode(String(value))
   }
@@ -509,13 +512,14 @@ export function parseId3v2(data: Uint8Array): { metadata: MediaMetadata; artwork
     let frameSize: number
     if (version === 4) {
       frameSize = readSyncsafeInt(data, offset + 4)
-    } else {
+    }
+    else {
       frameSize = readUint32BE(data, offset + 4)
     }
 
     if (frameSize === 0 || frameSize > end - offset - 10) break
 
-    const frameFlags = readUint16BE(data, offset + 8)
+    const _frameFlags = readUint16BE(data, offset + 8)
     offset += 10
 
     const frameData = data.slice(offset, offset + frameSize)
@@ -523,7 +527,8 @@ export function parseId3v2(data: Uint8Array): { metadata: MediaMetadata; artwork
     if (frameId === 'APIC') {
       const art = parseApicFrame(frameData)
       if (art) artwork.push(art)
-    } else {
+    }
+    else {
       const field = ID3_FRAMES[frameId]
       if (field) {
         const value = parseTextFrame(frameData)
@@ -533,17 +538,21 @@ export function parseId3v2(data: Uint8Array): { metadata: MediaMetadata; artwork
             if (!isNaN(year)) {
               metadata.year = year
             }
-          } else if (field === 'trackNumber' && typeof value === 'string') {
+          }
+          else if (field === 'trackNumber' && typeof value === 'string') {
             const parts = value.split('/')
             metadata.trackNumber = parseInt(parts[0], 10) || undefined
             if (parts[1]) metadata.trackTotal = parseInt(parts[1], 10) || undefined
-          } else if (field === 'discNumber' && typeof value === 'string') {
+          }
+          else if (field === 'discNumber' && typeof value === 'string') {
             const parts = value.split('/')
             metadata.discNumber = parseInt(parts[0], 10) || undefined
             if (parts[1]) metadata.discTotal = parseInt(parts[1], 10) || undefined
-          } else if (field === 'tempo' && typeof value === 'string') {
+          }
+          else if (field === 'tempo' && typeof value === 'string') {
             metadata.tempo = parseInt(value, 10) || undefined
-          } else {
+          }
+          else {
             (metadata as Record<string, unknown>)[field] = value
           }
         }
@@ -619,11 +628,14 @@ export function createId3v2Tag(metadata: MediaMetadata, artwork?: CoverArt[]): U
     let textValue: string
     if (key === 'trackNumber' && metadata.trackTotal) {
       textValue = `${value}/${metadata.trackTotal}`
-    } else if (key === 'discNumber' && metadata.discTotal) {
+    }
+    else if (key === 'discNumber' && metadata.discTotal) {
       textValue = `${value}/${metadata.discTotal}`
-    } else if (key === 'trackTotal' || key === 'discTotal') {
+    }
+    else if (key === 'trackTotal' || key === 'discTotal') {
       continue // Handled above
-    } else {
+    }
+    else {
       textValue = String(value)
     }
 
@@ -806,19 +818,23 @@ export function parseVorbisComments(data: Uint8Array): { metadata: MediaMetadata
         const decoded = decodeBase64(value)
         const art = parseFlacPicture(decoded)
         if (art) artwork.push(art)
-      } catch {
+      }
+      catch {
         // Invalid base64, skip
       }
-    } else {
+    }
+    else {
       const field = VORBIS_FIELDS[key]
       if (field) {
         if (field === 'year') {
           const year = parseInt(value, 10)
           if (!isNaN(year)) metadata.year = year
-        } else if (field === 'trackNumber' || field === 'discNumber' || field === 'trackTotal' || field === 'discTotal') {
+        }
+        else if (field === 'trackNumber' || field === 'discNumber' || field === 'trackTotal' || field === 'discTotal') {
           const num = parseInt(value, 10)
           if (!isNaN(num)) (metadata as Record<string, unknown>)[field] = num
-        } else {
+        }
+        else {
           (metadata as Record<string, unknown>)[field] = value
         }
       }
@@ -1079,7 +1095,8 @@ function parseSimpleTag(data: Uint8Array, metadata: MediaMetadata): void {
 
     if (id === MATROSKA_TAG_IDS.TAG_NAME) {
       name = new TextDecoder('utf-8').decode(elementData)
-    } else if (id === MATROSKA_TAG_IDS.TAG_STRING) {
+    }
+    else if (id === MATROSKA_TAG_IDS.TAG_STRING) {
       value = new TextDecoder('utf-8').decode(elementData)
     }
 
@@ -1091,13 +1108,16 @@ function parseSimpleTag(data: Uint8Array, metadata: MediaMetadata): void {
     if (field === 'year') {
       const year = parseInt(value, 10)
       if (!isNaN(year)) metadata.year = year
-    } else if (field === 'trackNumber' || field === 'trackTotal') {
+    }
+    else if (field === 'trackNumber' || field === 'trackTotal') {
       const num = parseInt(value, 10)
       if (!isNaN(num)) (metadata as Record<string, unknown>)[field] = num
-    } else if (field === 'actors') {
+    }
+    else if (field === 'actors') {
       metadata.actors = metadata.actors ?? []
       metadata.actors.push(value)
-    } else {
+    }
+    else {
       (metadata as Record<string, unknown>)[field] = value
     }
   }
@@ -1113,16 +1133,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (firstByte >= 0x80) {
     id = firstByte
     idLen = 1
-  } else if (firstByte >= 0x40) {
+  }
+  else if (firstByte >= 0x40) {
     id = (firstByte << 8) | data[offset + 1]
     idLen = 2
-  } else if (firstByte >= 0x20) {
+  }
+  else if (firstByte >= 0x20) {
     id = (firstByte << 16) | (data[offset + 1] << 8) | data[offset + 2]
     idLen = 3
-  } else if (firstByte >= 0x10) {
+  }
+  else if (firstByte >= 0x10) {
     id = (firstByte << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
     idLen = 4
-  } else {
+  }
+  else {
     return { id: 0, size: 0, headerSize: 0 }
   }
 
@@ -1134,16 +1158,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (sizeByte >= 0x80) {
     size = sizeByte & 0x7f
     sizeLen = 1
-  } else if (sizeByte >= 0x40) {
+  }
+  else if (sizeByte >= 0x40) {
     size = ((sizeByte & 0x3f) << 8) | data[sizeOffset + 1]
     sizeLen = 2
-  } else if (sizeByte >= 0x20) {
+  }
+  else if (sizeByte >= 0x20) {
     size = ((sizeByte & 0x1f) << 16) | (data[sizeOffset + 1] << 8) | data[sizeOffset + 2]
     sizeLen = 3
-  } else if (sizeByte >= 0x10) {
+  }
+  else if (sizeByte >= 0x10) {
     size = ((sizeByte & 0x0f) << 24) | (data[sizeOffset + 1] << 16) | (data[sizeOffset + 2] << 8) | data[sizeOffset + 3]
     sizeLen = 4
-  } else {
+  }
+  else {
     sizeLen = 1
   }
 

@@ -443,31 +443,42 @@ export function parseMediaPlaylist(content: string): {
 
     if (line.startsWith('#EXT-X-VERSION:')) {
       options.version = parseInt(line.substring(15), 10)
-    } else if (line.startsWith('#EXT-X-TARGETDURATION:')) {
+    }
+    else if (line.startsWith('#EXT-X-TARGETDURATION:')) {
       options.targetDuration = parseInt(line.substring(22), 10)
-    } else if (line.startsWith('#EXT-X-MEDIA-SEQUENCE:')) {
+    }
+    else if (line.startsWith('#EXT-X-MEDIA-SEQUENCE:')) {
       options.mediaSequence = parseInt(line.substring(22), 10)
-    } else if (line.startsWith('#EXT-X-PLAYLIST-TYPE:')) {
+    }
+    else if (line.startsWith('#EXT-X-PLAYLIST-TYPE:')) {
       options.playlistType = line.substring(21) as 'VOD' | 'EVENT'
-    } else if (line === '#EXT-X-INDEPENDENT-SEGMENTS') {
+    }
+    else if (line === '#EXT-X-INDEPENDENT-SEGMENTS') {
       options.independentSegments = true
-    } else if (line === '#EXT-X-DISCONTINUITY') {
+    }
+    else if (line === '#EXT-X-DISCONTINUITY') {
       currentSegment.discontinuity = true
-    } else if (line.startsWith('#EXT-X-KEY:')) {
+    }
+    else if (line.startsWith('#EXT-X-KEY:')) {
       currentKey = parseKey(line.substring(11))
-    } else if (line.startsWith('#EXT-X-MAP:')) {
+    }
+    else if (line.startsWith('#EXT-X-MAP:')) {
       currentMap = parseMap(line.substring(11))
-    } else if (line.startsWith('#EXT-X-PROGRAM-DATE-TIME:')) {
+    }
+    else if (line.startsWith('#EXT-X-PROGRAM-DATE-TIME:')) {
       currentSegment.programDateTime = new Date(line.substring(25))
-    } else if (line.startsWith('#EXT-X-BYTERANGE:')) {
+    }
+    else if (line.startsWith('#EXT-X-BYTERANGE:')) {
       currentSegment.byteRange = parseByteRange(line.substring(17))
-    } else if (line.startsWith('#EXTINF:')) {
+    }
+    else if (line.startsWith('#EXTINF:')) {
       const match = line.match(/#EXTINF:([\d.]+),?(.*)/)
       if (match) {
         currentSegment.duration = parseFloat(match[1])
         if (match[2]) currentSegment.title = match[2]
       }
-    } else if (!line.startsWith('#')) {
+    }
+    else if (!line.startsWith('#')) {
       // URI line
       segments.push({
         uri: line,

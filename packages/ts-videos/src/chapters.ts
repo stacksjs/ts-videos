@@ -111,7 +111,8 @@ function parsemp4MoovBox(data: Uint8Array, chapters: Chapter[]): void {
 
     if (type === 'udta') {
       parseMp4UdtaBox(data.slice(offset + 8, offset + size), chapters)
-    } else if (type === 'trak') {
+    }
+    else if (type === 'trak') {
       parseMp4TrakBox(data.slice(offset + 8, offset + size), chapters)
     }
 
@@ -385,16 +386,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (firstByte >= 0x80) {
     id = firstByte
     idLen = 1
-  } else if (firstByte >= 0x40) {
+  }
+  else if (firstByte >= 0x40) {
     id = (firstByte << 8) | data[offset + 1]
     idLen = 2
-  } else if (firstByte >= 0x20) {
+  }
+  else if (firstByte >= 0x20) {
     id = (firstByte << 16) | (data[offset + 1] << 8) | data[offset + 2]
     idLen = 3
-  } else if (firstByte >= 0x10) {
+  }
+  else if (firstByte >= 0x10) {
     id = (firstByte << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
     idLen = 4
-  } else {
+  }
+  else {
     return { id: 0, size: 0, headerSize: 0 }
   }
 
@@ -407,16 +412,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (sizeByte >= 0x80) {
     size = sizeByte & 0x7f
     sizeLen = 1
-  } else if (sizeByte >= 0x40) {
+  }
+  else if (sizeByte >= 0x40) {
     size = ((sizeByte & 0x3f) << 8) | data[sizeOffset + 1]
     sizeLen = 2
-  } else if (sizeByte >= 0x20) {
+  }
+  else if (sizeByte >= 0x20) {
     size = ((sizeByte & 0x1f) << 16) | (data[sizeOffset + 1] << 8) | data[sizeOffset + 2]
     sizeLen = 3
-  } else if (sizeByte >= 0x10) {
+  }
+  else if (sizeByte >= 0x10) {
     size = ((sizeByte & 0x0f) << 24) | (data[sizeOffset + 1] << 16) | (data[sizeOffset + 2] << 8) | data[sizeOffset + 3]
     sizeLen = 4
-  } else {
+  }
+  else {
     // Handle larger sizes if needed
     sizeLen = 1
   }
@@ -625,11 +634,14 @@ function createEbmlElement(id: number, data: Uint8Array): Uint8Array {
 function createEbmlId(id: number): Uint8Array {
   if (id < 0x80) {
     return new Uint8Array([id | 0x80])
-  } else if (id < 0x4000) {
+  }
+  else if (id < 0x4000) {
     return new Uint8Array([(id >> 8) | 0x40, id & 0xff])
-  } else if (id < 0x200000) {
+  }
+  else if (id < 0x200000) {
     return new Uint8Array([(id >> 16) | 0x20, (id >> 8) & 0xff, id & 0xff])
-  } else {
+  }
+  else {
     return new Uint8Array([(id >> 24) | 0x10, (id >> 16) & 0xff, (id >> 8) & 0xff, id & 0xff])
   }
 }
@@ -637,11 +649,14 @@ function createEbmlId(id: number): Uint8Array {
 function createEbmlSize(size: number): Uint8Array {
   if (size < 0x7f) {
     return new Uint8Array([size | 0x80])
-  } else if (size < 0x3fff) {
+  }
+  else if (size < 0x3fff) {
     return new Uint8Array([(size >> 8) | 0x40, size & 0xff])
-  } else if (size < 0x1fffff) {
+  }
+  else if (size < 0x1fffff) {
     return new Uint8Array([(size >> 16) | 0x20, (size >> 8) & 0xff, size & 0xff])
-  } else {
+  }
+  else {
     return new Uint8Array([(size >> 24) | 0x10, (size >> 16) & 0xff, (size >> 8) & 0xff, size & 0xff])
   }
 }
@@ -649,13 +664,17 @@ function createEbmlSize(size: number): Uint8Array {
 function createEbmlUint(value: number): Uint8Array {
   if (value < 0x100) {
     return new Uint8Array([value])
-  } else if (value < 0x10000) {
+  }
+  else if (value < 0x10000) {
     return new Uint8Array([value >> 8, value & 0xff])
-  } else if (value < 0x1000000) {
+  }
+  else if (value < 0x1000000) {
     return new Uint8Array([value >> 16, (value >> 8) & 0xff, value & 0xff])
-  } else if (value < 0x100000000) {
+  }
+  else if (value < 0x100000000) {
     return new Uint8Array([value >> 24, (value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff])
-  } else {
+  }
+  else {
     // Handle 8-byte values
     const high = Math.floor(value / 0x100000000)
     const low = value % 0x100000000
@@ -721,7 +740,8 @@ export function parseId3Chapters(data: Uint8Array): ChapterList {
     if (version === 4) {
       // ID3v2.4 uses syncsafe integers
       frameSize = ((data[offset + 4] & 0x7f) << 21) | ((data[offset + 5] & 0x7f) << 14) | ((data[offset + 6] & 0x7f) << 7) | (data[offset + 7] & 0x7f)
-    } else {
+    }
+    else {
       frameSize = (data[offset + 4] << 24) | (data[offset + 5] << 16) | (data[offset + 6] << 8) | data[offset + 7]
     }
 
@@ -1090,7 +1110,8 @@ export function mergeChapters(chapters: Chapter[], threshold: number = 1000): Ch
       // Merge chapters
       prev.endTime = curr.endTime ?? curr.startTime
       prev.title = `${prev.title} / ${curr.title}`
-    } else {
+    }
+    else {
       merged.push({ ...curr })
     }
   }

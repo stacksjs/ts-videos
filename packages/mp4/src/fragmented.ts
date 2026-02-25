@@ -262,7 +262,8 @@ export class FragmentedMp4Muxer extends Muxer {
     if (track.type === 'video') {
       width = track.config.width
       height = track.config.height
-    } else if (track.type === 'audio') {
+    }
+    else if (track.type === 'audio') {
       volume = 0x0100
     }
 
@@ -355,15 +356,17 @@ export class FragmentedMp4Muxer extends Muxer {
     if (data.track.type === 'video') {
       handlerType = 'vide'
       name = 'VideoHandler'
-    } else if (data.track.type === 'audio') {
+    }
+    else if (data.track.type === 'audio') {
       handlerType = 'soun'
       name = 'SoundHandler'
-    } else {
+    }
+    else {
       handlerType = 'text'
       name = 'SubtitleHandler'
     }
 
-    const nameBytes = new TextEncoder().encode(name + '\0')
+    const nameBytes = new TextEncoder().encode(`${name}\0`)
     const size = 32 + nameBytes.byteLength + 8
 
     await writer.writeU32BE(size)
@@ -385,9 +388,11 @@ export class FragmentedMp4Muxer extends Muxer {
     let xmhd: Uint8Array
     if (data.track.type === 'video') {
       xmhd = await this.buildVmhd()
-    } else if (data.track.type === 'audio') {
+    }
+    else if (data.track.type === 'audio') {
       xmhd = await this.buildSmhd()
-    } else {
+    }
+    else {
       xmhd = await this.buildNmhd()
     }
 
@@ -523,9 +528,11 @@ export class FragmentedMp4Muxer extends Muxer {
     let entry: Uint8Array
     if (data.track.type === 'video') {
       entry = await this.buildVideoSampleEntry(data.track)
-    } else if (data.track.type === 'audio') {
+    }
+    else if (data.track.type === 'audio') {
       entry = await this.buildAudioSampleEntry(data.track)
-    } else {
+    }
+    else {
       entry = new Uint8Array(0)
     }
 
@@ -916,7 +923,7 @@ export class FragmentedMp4Muxer extends Muxer {
     const writer = new Writer()
 
     // Build tfra boxes
-    const tfras: Uint8Array[] = []
+    const _tfras: Uint8Array[] = []
     // For simplicity, we're not tracking random access points here
     // In a full implementation, we would track keyframe positions
 

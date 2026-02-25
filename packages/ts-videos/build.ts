@@ -1,3 +1,4 @@
+/* eslint-disable no-console, ts/no-top-level-await */
 import { dts } from 'bun-plugin-dtsx'
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -32,5 +33,12 @@ await Bun.build({
   minify: true,
   external: ['ts-audio', 'ts-gif', 'bunfig'],
 })
+
+// Add shebang to CLI
+const cliPath = path.resolve(import.meta.dir, 'dist/bin/cli.js')
+const cliContent = await Bun.file(cliPath).text()
+if (!cliContent.startsWith('#!')) {
+  await Bun.write(cliPath, `#!/usr/bin/env bun\n${cliContent}`)
+}
 
 console.log('Built')

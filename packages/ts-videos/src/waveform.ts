@@ -144,7 +144,8 @@ export class WaveformGenerator {
           // Specific channel
           const sampleIndex = s * this.channels + channel
           value = flatSamples[sampleIndex] ?? 0
-        } else {
+        }
+        else {
           // Mix all channels
           value = 0
           for (let ch = 0; ch < this.channels; ch++) {
@@ -216,7 +217,8 @@ export class WaveformGenerator {
       for (const point of data) {
         maxValue = Math.max(maxValue, Math.abs(point.min), Math.abs(point.max))
       }
-    } else {
+    }
+    else {
       for (const point of data) {
         maxValue = Math.max(maxValue, point.rms)
       }

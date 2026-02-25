@@ -46,7 +46,7 @@ export interface StreamingOptions {
 /**
  * Chunk writer callback
  */
-export type ChunkCallback = (chunk: StreamChunk) => void | Promise<void>
+export type ChunkCallback = (_chunk: StreamChunk) => void | Promise<void>
 
 /**
  * ChunkedStreamWriter - Write media in chunks for streaming
@@ -178,7 +178,7 @@ export class ChunkedStreamWriter {
     let offset = 0
 
     for (const chunk of this.currentChunkData) {
-      data.set(chunk, offset)
+      data.set(_chunk, offset)
       offset += chunk.byteLength
     }
 
@@ -192,10 +192,10 @@ export class ChunkedStreamWriter {
       startsWithKeyframe: this.hasKeyframe,
     }
 
-    this.chunks.push(chunk)
+    this.chunks.push(_chunk)
 
     if (this.callback) {
-      await this.callback(chunk)
+      await this.callback(_chunk)
     }
 
     // Reset for next chunk
@@ -296,7 +296,7 @@ export class AppendableBuffer {
     let offset = 0
 
     for (const chunk of this.chunks) {
-      result.set(chunk, offset)
+      result.set(_chunk, offset)
       offset += chunk.byteLength
     }
 
@@ -633,8 +633,8 @@ export function createPacketTransformStream(
   transform: (packet: EncodedPacket) => EncodedPacket | null | Promise<EncodedPacket | null>,
 ): TransformStream<EncodedPacket, EncodedPacket> {
   return new TransformStream<EncodedPacket, EncodedPacket>({
-    async transform(chunk, controller) {
-      const result = await transform(chunk)
+    async transform(_chunk, controller) {
+      const result = await transform(_chunk)
       if (result) {
         controller.enqueue(result)
       }
@@ -649,9 +649,9 @@ export function createPacketFilterStream(
   predicate: (packet: EncodedPacket) => boolean | Promise<boolean>,
 ): TransformStream<EncodedPacket, EncodedPacket> {
   return new TransformStream<EncodedPacket, EncodedPacket>({
-    async transform(chunk, controller) {
-      if (await predicate(chunk)) {
-        controller.enqueue(chunk)
+    async transform(_chunk, controller) {
+      if (await predicate(_chunk)) {
+        controller.enqueue(_chunk)
       }
     },
   })

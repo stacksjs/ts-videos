@@ -329,7 +329,8 @@ function parseVttTime(timeStr: string): number {
     hours = parseInt(parts[0])
     minutes = parseInt(parts[1])
     seconds = parseFloat(parts[2])
-  } else if (parts.length === 2) {
+  }
+  else if (parts.length === 2) {
     minutes = parseInt(parts[0])
     seconds = parseFloat(parts[1])
   }
@@ -444,18 +445,22 @@ export function parseAss(content: string): SubtitleTrack {
         const value = trimmed.slice(colonIndex + 1).trim()
         header[key] = value
       }
-    } else if (section === 'v4+ styles' || section === 'v4 styles') {
+    }
+    else if (section === 'v4+ styles' || section === 'v4 styles') {
       if (trimmed.startsWith('Format:')) {
         styleFormat = trimmed.slice(7).split(',').map((s) => s.trim().toLowerCase())
-      } else if (trimmed.startsWith('Style:')) {
+      }
+      else if (trimmed.startsWith('Style:')) {
         const values = parseAssCsv(trimmed.slice(6))
         const style = parseAssStyle(styleFormat, values)
         if (style) styles.push(style)
       }
-    } else if (section === 'events') {
+    }
+    else if (section === 'events') {
       if (trimmed.startsWith('Format:')) {
         eventFormat = trimmed.slice(7).split(',').map((s) => s.trim().toLowerCase())
-      } else if (trimmed.startsWith('Dialogue:')) {
+      }
+      else if (trimmed.startsWith('Dialogue:')) {
         const values = parseAssCsv(trimmed.slice(9))
         const cue = parseAssDialogue(eventFormat, values)
         if (cue) cues.push(cue)
@@ -479,7 +484,8 @@ function parseAssCsv(line: string): string[] {
     if (char === ',' && depth === 0) {
       values.push(current.trim())
       current = ''
-    } else {
+    }
+    else {
       current += char
     }
   }
@@ -656,7 +662,8 @@ export function generateAss(track: SubtitleTrack): string {
     for (const style of track.styles) {
       lines.push(`Style: ${style.name},${style.fontName},${style.fontSize},${style.primaryColor},${style.secondaryColor},${style.outlineColor},${style.backColor},${style.bold ? -1 : 0},${style.italic ? -1 : 0},${style.underline ? -1 : 0},${style.strikeOut ? -1 : 0},${style.scaleX},${style.scaleY},${style.spacing},${style.angle},${style.borderStyle},${style.outline},${style.shadow},${style.alignment},${style.marginL},${style.marginR},${style.marginV},${style.encoding}`)
     }
-  } else {
+  }
+  else {
     // Default style
     lines.push('Style: Default,Arial,20,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1')
   }
@@ -732,7 +739,7 @@ function parseTtmlTime(timeStr: string): number {
   // HH:MM:SS.mmm or HH:MM:SS:frames or offset (e.g., "10s", "100ms")
 
   // Offset format
-  if (/^\d+(\.\d+)?s$/.test(timeStr)) {
+  if (/^\d+(?:\.\d+)?s$/.test(timeStr)) {
     return Math.round(parseFloat(timeStr) * 1000)
   }
   if (/^\d+ms$/.test(timeStr)) {
@@ -751,7 +758,8 @@ function parseTtmlTime(timeStr: string): number {
       const frac = match[4]
       if (frac.length <= 3) {
         millis = parseInt(frac.padEnd(3, '0'))
-      } else {
+      }
+      else {
         // Frames - assume 30fps
         millis = Math.round((parseInt(frac) / 30) * 1000)
       }
@@ -764,7 +772,7 @@ function parseTtmlTime(timeStr: string): number {
 }
 
 /** Generate TTML subtitle file */
-export function generateTtml(track: SubtitleTrack, options: { frameRate?: number } = {}): string {
+export function generateTtml(track: SubtitleTrack, _options: { frameRate?: number } = {}): string {
   const lines: string[] = []
 
   lines.push('<?xml version="1.0" encoding="UTF-8"?>')
@@ -918,7 +926,8 @@ export function splitLongCues(track: SubtitleTrack, maxDurationMs: number): Subt
 
     if (duration <= maxDurationMs) {
       newCues.push(cue)
-    } else {
+    }
+    else {
       // Split into multiple cues
       const parts = Math.ceil(duration / maxDurationMs)
       const words = cue.text.split(/\s+/)

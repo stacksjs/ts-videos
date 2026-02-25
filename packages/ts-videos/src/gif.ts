@@ -101,7 +101,7 @@ export function quantizeColors(
   }))
 
   // Median cut algorithm
-  const palette = medianCut(colors, colorCount)
+  const _palette = medianCut(colors, colorCount)
 
   // Convert to packed RGB values
   return palette.map((c) => (c.r << 16) | (c.g << 8) | c.b)
@@ -277,7 +277,8 @@ export function applyDithering(
           [0, 1, 5 / 16],
           [1, 1, 1 / 16],
         ])
-      } else if (method === 'atkinson') {
+      }
+      else if (method === 'atkinson') {
         distributeError(errors, width, height, x, y, errR, errG, errB, [
           [1, 0, 1 / 8],
           [2, 0, 1 / 8],
@@ -286,7 +287,8 @@ export function applyDithering(
           [1, 1, 1 / 8],
           [0, 2, 1 / 8],
         ])
-      } else if (method === 'ordered') {
+      }
+      else if (method === 'ordered') {
         // Ordered dithering uses a threshold matrix instead of error diffusion
         // Already handled in pixel selection
       }
@@ -649,9 +651,9 @@ export function estimateGifSize(
   // GIF uses LZW compression, typically achieving 40-60% compression
   const uncompressedPerFrame = dims.width * dims.height * bitsPerPixel / 8
   const estimatedCompression = 0.5
-  const perFrameOverhead = 50 // Frame headers, etc.
+  const perFrameOverhead = 50 // frame header overhead
 
-  const headerSize = 800 // GIF header, palette, etc.
+  const headerSize = 800 // GIF header and color table overhead
   const totalFrameSize = frames.length * (uncompressedPerFrame * estimatedCompression + perFrameOverhead)
 
   return Math.round(headerSize + totalFrameSize)

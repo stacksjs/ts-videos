@@ -27,172 +27,172 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./audio-analysis": {
-      "import": "./dist/audio-analysis.js",
-      "types": "./dist/audio-analysis.d.ts"
+      "types": "./dist/audio-analysis.d.ts",
+      "import": "./dist/audio-analysis.js"
     },
     "./audio-effects": {
-      "import": "./dist/audio-effects.js",
-      "types": "./dist/audio-effects.d.ts"
+      "types": "./dist/audio-effects.d.ts",
+      "import": "./dist/audio-effects.js"
     },
     "./batch": {
-      "import": "./dist/batch.js",
-      "types": "./dist/batch.d.ts"
+      "types": "./dist/batch.d.ts",
+      "import": "./dist/batch.js"
     },
     "./bitstream": {
-      "import": "./dist/bitstream.js",
-      "types": "./dist/bitstream.d.ts"
+      "types": "./dist/bitstream.d.ts",
+      "import": "./dist/bitstream.js"
     },
     "./chapters": {
-      "import": "./dist/chapters.js",
-      "types": "./dist/chapters.d.ts"
+      "types": "./dist/chapters.d.ts",
+      "import": "./dist/chapters.js"
     },
     "./codecs": {
-      "import": "./dist/codecs.js",
-      "types": "./dist/codecs.d.ts"
+      "types": "./dist/codecs.d.ts",
+      "import": "./dist/codecs.js"
     },
     "./color": {
-      "import": "./dist/color.js",
-      "types": "./dist/color.d.ts"
+      "types": "./dist/color.d.ts",
+      "import": "./dist/color.js"
     },
     "./concat-split": {
-      "import": "./dist/concat-split.js",
-      "types": "./dist/concat-split.d.ts"
+      "types": "./dist/concat-split.d.ts",
+      "import": "./dist/concat-split.js"
     },
     "./config": {
-      "import": "./dist/config.js",
-      "types": "./dist/config.d.ts"
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
     },
     "./conversion": {
-      "import": "./dist/conversion.js",
-      "types": "./dist/conversion.d.ts"
+      "types": "./dist/conversion.d.ts",
+      "import": "./dist/conversion.js"
     },
     "./cover-art": {
-      "import": "./dist/cover-art.js",
-      "types": "./dist/cover-art.d.ts"
+      "types": "./dist/cover-art.d.ts",
+      "import": "./dist/cover-art.js"
     },
     "./dash": {
-      "import": "./dist/dash.js",
-      "types": "./dist/dash.d.ts"
+      "types": "./dist/dash.d.ts",
+      "import": "./dist/dash.js"
     },
     "./demuxer": {
-      "import": "./dist/demuxer.js",
-      "types": "./dist/demuxer.d.ts"
+      "types": "./dist/demuxer.d.ts",
+      "import": "./dist/demuxer.js"
     },
     "./filters": {
-      "import": "./dist/filters.js",
-      "types": "./dist/filters.d.ts"
+      "types": "./dist/filters.d.ts",
+      "import": "./dist/filters.js"
     },
     "./formats": {
-      "import": "./dist/formats.js",
-      "types": "./dist/formats.d.ts"
+      "types": "./dist/formats.d.ts",
+      "import": "./dist/formats.js"
     },
     "./gif": {
-      "import": "./dist/gif.js",
-      "types": "./dist/gif.d.ts"
+      "types": "./dist/gif.d.ts",
+      "import": "./dist/gif.js"
     },
     "./hdr-sdr": {
-      "import": "./dist/hdr-sdr.js",
-      "types": "./dist/hdr-sdr.d.ts"
+      "types": "./dist/hdr-sdr.d.ts",
+      "import": "./dist/hdr-sdr.js"
     },
     "./hls": {
-      "import": "./dist/hls.js",
-      "types": "./dist/hls.d.ts"
+      "types": "./dist/hls.d.ts",
+      "import": "./dist/hls.js"
     },
     "./image-sequence": {
-      "import": "./dist/image-sequence.js",
-      "types": "./dist/image-sequence.d.ts"
+      "types": "./dist/image-sequence.d.ts",
+      "import": "./dist/image-sequence.js"
     },
     "./input": {
-      "import": "./dist/input.js",
-      "types": "./dist/input.d.ts"
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
     },
     "./interlace": {
-      "import": "./dist/interlace.js",
-      "types": "./dist/interlace.d.ts"
+      "types": "./dist/interlace.d.ts",
+      "import": "./dist/interlace.js"
     },
     "./loudness": {
-      "import": "./dist/loudness.js",
-      "types": "./dist/loudness.d.ts"
+      "types": "./dist/loudness.d.ts",
+      "import": "./dist/loudness.js"
     },
     "./metadata": {
-      "import": "./dist/metadata.js",
-      "types": "./dist/metadata.d.ts"
+      "types": "./dist/metadata.d.ts",
+      "import": "./dist/metadata.js"
     },
     "./muxer": {
-      "import": "./dist/muxer.js",
-      "types": "./dist/muxer.d.ts"
+      "types": "./dist/muxer.d.ts",
+      "import": "./dist/muxer.js"
     },
     "./output": {
-      "import": "./dist/output.js",
-      "types": "./dist/output.d.ts"
+      "types": "./dist/output.d.ts",
+      "import": "./dist/output.js"
     },
     "./presets": {
-      "import": "./dist/presets.js",
-      "types": "./dist/presets.d.ts"
+      "types": "./dist/presets.d.ts",
+      "import": "./dist/presets.js"
     },
     "./quality-metrics": {
-      "import": "./dist/quality-metrics.js",
-      "types": "./dist/quality-metrics.d.ts"
+      "types": "./dist/quality-metrics.d.ts",
+      "import": "./dist/quality-metrics.js"
     },
     "./reader": {
-      "import": "./dist/reader.js",
-      "types": "./dist/reader.d.ts"
+      "types": "./dist/reader.d.ts",
+      "import": "./dist/reader.js"
     },
     "./scene-detection": {
-      "import": "./dist/scene-detection.js",
-      "types": "./dist/scene-detection.d.ts"
+      "types": "./dist/scene-detection.d.ts",
+      "import": "./dist/scene-detection.js"
     },
     "./sinks": {
-      "import": "./dist/sinks.js",
-      "types": "./dist/sinks.d.ts"
+      "types": "./dist/sinks.d.ts",
+      "import": "./dist/sinks.js"
     },
     "./source": {
-      "import": "./dist/source.js",
-      "types": "./dist/source.d.ts"
+      "types": "./dist/source.d.ts",
+      "import": "./dist/source.js"
     },
     "./sources": {
-      "import": "./dist/sources.js",
-      "types": "./dist/sources.d.ts"
+      "types": "./dist/sources.d.ts",
+      "import": "./dist/sources.js"
     },
     "./streaming": {
-      "import": "./dist/streaming.js",
-      "types": "./dist/streaming.d.ts"
+      "types": "./dist/streaming.d.ts",
+      "import": "./dist/streaming.js"
     },
     "./subtitles": {
-      "import": "./dist/subtitles.js",
-      "types": "./dist/subtitles.d.ts"
+      "types": "./dist/subtitles.d.ts",
+      "import": "./dist/subtitles.js"
     },
     "./target": {
-      "import": "./dist/target.js",
-      "types": "./dist/target.d.ts"
+      "types": "./dist/target.d.ts",
+      "import": "./dist/target.js"
     },
     "./thumbnails": {
-      "import": "./dist/thumbnails.js",
-      "types": "./dist/thumbnails.d.ts"
+      "types": "./dist/thumbnails.d.ts",
+      "import": "./dist/thumbnails.js"
     },
     "./types": {
-      "import": "./dist/types.js",
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
     },
     "./utils": {
-      "import": "./dist/utils.js",
-      "types": "./dist/utils.d.ts"
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js"
     },
     "./validation": {
-      "import": "./dist/validation.js",
-      "types": "./dist/validation.d.ts"
+      "types": "./dist/validation.d.ts",
+      "import": "./dist/validation.js"
     },
     "./waveform": {
-      "import": "./dist/waveform.js",
-      "types": "./dist/waveform.d.ts"
+      "types": "./dist/waveform.d.ts",
+      "import": "./dist/waveform.js"
     },
     "./writer": {
-      "import": "./dist/writer.js",
-      "types": "./dist/writer.d.ts"
+      "types": "./dist/writer.d.ts",
+      "import": "./dist/writer.js"
     }
   },
   "module": "./dist/index.js",

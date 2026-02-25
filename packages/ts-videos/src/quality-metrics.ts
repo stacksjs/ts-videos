@@ -179,7 +179,8 @@ export function calculateSsim(
     if (luminanceOnly) {
       gray1[j] = 0.299 * original.data[i] + 0.587 * original.data[i + 1] + 0.114 * original.data[i + 2]
       gray2[j] = 0.299 * compressed.data[i] + 0.587 * compressed.data[i + 1] + 0.114 * compressed.data[i + 2]
-    } else {
+    }
+    else {
       gray1[j] = (original.data[i] + original.data[i + 1] + original.data[i + 2]) / 3
       gray2[j] = (compressed.data[i] + compressed.data[i + 1] + compressed.data[i + 2]) / 3
     }
@@ -301,7 +302,8 @@ export function calculateMsSsim(
     // Use contrast and structure for intermediate levels, all components for last level
     if (level === levels - 1) {
       msSsim *= Math.pow(ssim, weight)
-    } else {
+    }
+    else {
       // Approximate: use SSIM as proxy for contrast/structure
       msSsim *= Math.pow(Math.max(0, ssim), weight)
     }

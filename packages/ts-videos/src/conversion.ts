@@ -21,7 +21,7 @@ export interface ConversionProgress {
   samplesProcessed: number
 }
 
-export type ProgressCallback = (progress: ConversionProgress) => void
+export type ProgressCallback = (_progress: ConversionProgress) => void
 
 export class Conversion {
   private input: Input

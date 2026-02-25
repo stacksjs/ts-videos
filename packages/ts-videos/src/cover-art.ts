@@ -199,7 +199,8 @@ function parseJpegDimensions(data: Uint8Array): { width: number; height: number 
     if (marker >= 0xE0 && marker <= 0xFE) {
       const length = (data[offset + 2] << 8) | data[offset + 3]
       offset += 2 + length
-    } else {
+    }
+    else {
       offset += 2
     }
   }
@@ -336,7 +337,8 @@ export function parseId3Apic(frameData: Uint8Array): CoverArt | null {
       descEnd += 2
     }
     descEnd += 2 // Skip double null
-  } else {
+  }
+  else {
     while (descEnd < frameData.length && frameData[descEnd] !== 0) descEnd++
     descEnd++ // Skip null
   }

@@ -515,7 +515,7 @@ export function listPresetsByPlatform(platform: string): EncodingPreset[] {
 export function getPresetForFileSize(
   durationSeconds: number,
   targetSizeMB: number,
-  preferQuality: boolean = false,
+  _preferQuality: boolean = false,
 ): EncodingPreset {
   const targetBitrate = (targetSizeMB * 8 * 1024 * 1024) / durationSeconds
 
@@ -537,7 +537,8 @@ export function getPresetForFileSize(
         maxHeight: 480,
       },
     }
-  } else if (videoBitrate < 3000000) {
+  }
+  else if (videoBitrate < 3000000) {
     return {
       ...WEB_PRESETS.progressive,
       name: 'Auto - Medium Bitrate',
@@ -548,7 +549,8 @@ export function getPresetForFileSize(
         maxHeight: 720,
       },
     }
-  } else {
+  }
+  else {
     return {
       ...WEB_PRESETS.progressive,
       name: 'Auto - High Bitrate',

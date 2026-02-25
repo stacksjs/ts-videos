@@ -30,7 +30,8 @@ export class VideoSampleSource implements MediaSource<VideoSample> {
   constructor(source?: AsyncIterable<VideoSample> | VideoSample[]) {
     if (Array.isArray(source)) {
       this.samples = source
-    } else if (source) {
+    }
+    else if (source) {
       this.generator = source[Symbol.asyncIterator]() as AsyncGenerator<VideoSample>
     }
   }
@@ -42,7 +43,8 @@ export class VideoSampleSource implements MediaSource<VideoSample> {
   async *items(): AsyncGenerator<VideoSample> {
     if (this.generator) {
       yield* this.generator
-    } else {
+    }
+    else {
       for (const sample of this.samples) {
         yield sample
       }
@@ -69,7 +71,8 @@ export class AudioSampleSource implements MediaSource<AudioSample> {
   constructor(source?: AsyncIterable<AudioSample> | AudioSample[]) {
     if (Array.isArray(source)) {
       this.samples = source
-    } else if (source) {
+    }
+    else if (source) {
       this.generator = source[Symbol.asyncIterator]() as AsyncGenerator<AudioSample>
     }
   }
@@ -81,7 +84,8 @@ export class AudioSampleSource implements MediaSource<AudioSample> {
   async *items(): AsyncGenerator<AudioSample> {
     if (this.generator) {
       yield* this.generator
-    } else {
+    }
+    else {
       for (const sample of this.samples) {
         yield sample
       }
@@ -108,7 +112,8 @@ export class EncodedVideoPacketSource implements MediaSource<EncodedPacket> {
   constructor(source?: AsyncIterable<EncodedPacket> | EncodedPacket[]) {
     if (Array.isArray(source)) {
       this.packets = source
-    } else if (source) {
+    }
+    else if (source) {
       this.generator = source[Symbol.asyncIterator]() as AsyncGenerator<EncodedPacket>
     }
   }
@@ -120,7 +125,8 @@ export class EncodedVideoPacketSource implements MediaSource<EncodedPacket> {
   async *items(): AsyncGenerator<EncodedPacket> {
     if (this.generator) {
       yield* this.generator
-    } else {
+    }
+    else {
       for (const packet of this.packets) {
         yield packet
       }
@@ -142,7 +148,8 @@ export class EncodedAudioPacketSource implements MediaSource<EncodedPacket> {
   constructor(source?: AsyncIterable<EncodedPacket> | EncodedPacket[]) {
     if (Array.isArray(source)) {
       this.packets = source
-    } else if (source) {
+    }
+    else if (source) {
       this.generator = source[Symbol.asyncIterator]() as AsyncGenerator<EncodedPacket>
     }
   }
@@ -154,7 +161,8 @@ export class EncodedAudioPacketSource implements MediaSource<EncodedPacket> {
   async *items(): AsyncGenerator<EncodedPacket> {
     if (this.generator) {
       yield* this.generator
-    } else {
+    }
+    else {
       for (const packet of this.packets) {
         yield packet
       }
@@ -246,7 +254,8 @@ export class MediaStreamVideoTrackSource implements MediaSource<VideoSample> {
           }
         }
       }
-    } finally {
+    }
+    finally {
       this.reader.releaseLock()
     }
   }
@@ -311,7 +320,8 @@ export class MediaStreamAudioTrackSource implements MediaSource<AudioSample> {
           value.close()
         }
       }
-    } finally {
+    }
+    finally {
       this.reader?.releaseLock()
     }
   }

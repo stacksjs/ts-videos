@@ -171,7 +171,8 @@ export class AudioAnalyzer {
         sumSquares += data[i] * data[i]
         count++
       }
-    } else {
+    }
+    else {
       // Analyze all samples
       for (let i = 0; i < data.length; i++) {
         const value = Math.abs(data[i])
@@ -321,7 +322,8 @@ export class AudioAnalyzer {
         }
         silenceSum += rms
         silenceSamples++
-      } else if (inSilence) {
+      }
+      else if (inSilence) {
         const duration = currentTime - silenceStart
         if (duration >= minDuration) {
           regions.push({

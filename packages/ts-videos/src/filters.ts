@@ -57,7 +57,8 @@ export class ScaleFilter implements VideoFilter {
 
     if (width === -1) {
       width = Math.round(height * aspectRatio)
-    } else if (height === -1) {
+    }
+    else if (height === -1) {
       height = Math.round(width / aspectRatio)
     }
 
@@ -68,7 +69,8 @@ export class ScaleFilter implements VideoFilter {
       }
       width = Math.round(inputWidth * scale)
       height = Math.round(inputHeight * scale)
-    } else if (this.options.fit === 'cover') {
+    }
+    else if (this.options.fit === 'cover') {
       const scale = Math.max(width / inputWidth, height / inputHeight)
       width = Math.round(inputWidth * scale)
       height = Math.round(inputHeight * scale)
@@ -244,13 +246,16 @@ export class FlipFilter implements VideoFilter {
     if (this.options.horizontal && this.options.vertical) {
       ctx.scale(-1, -1)
       ctx.drawImage(frame, -width, -height)
-    } else if (this.options.horizontal) {
+    }
+    else if (this.options.horizontal) {
       ctx.scale(-1, 1)
       ctx.drawImage(frame, -width, 0)
-    } else if (this.options.vertical) {
+    }
+    else if (this.options.vertical) {
       ctx.scale(1, -1)
       ctx.drawImage(frame, 0, -height)
-    } else {
+    }
+    else {
       ctx.drawImage(frame, 0, 0)
     }
 
@@ -680,7 +685,8 @@ export class FilterChain {
 
       if (currentInput instanceof VideoFrame) {
         await filter.process(currentInput, outputCanvas, outputCtx)
-      } else {
+      }
+      else {
         // Create temporary VideoFrame from canvas
         const tempFrame = new VideoFrame(currentInput, {
           timestamp: frame.timestamp,

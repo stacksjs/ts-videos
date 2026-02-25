@@ -172,20 +172,24 @@ export class ThumbnailGenerator {
           if (fit === 'scale-down' && scale > 1) {
             outputWidth = sourceWidth
             outputHeight = sourceHeight
-          } else {
+          }
+          else {
             outputWidth = Math.round(sourceWidth * scale)
             outputHeight = Math.round(sourceHeight * scale)
           }
           break
         }
       }
-    } else if (targetWidth) {
+    }
+    else if (targetWidth) {
       outputWidth = targetWidth
       outputHeight = Math.round(targetWidth / aspectRatio)
-    } else if (targetHeight) {
+    }
+    else if (targetHeight) {
       outputHeight = targetHeight
       outputWidth = Math.round(targetHeight * aspectRatio)
-    } else {
+    }
+    else {
       outputWidth = sourceWidth
       outputHeight = sourceHeight
     }
@@ -209,7 +213,8 @@ export class ThumbnailGenerator {
       canvas.width = targetWidth
       canvas.height = targetHeight
       ctx.drawImage(frame, offsetX, offsetY, scaledWidth, scaledHeight)
-    } else {
+    }
+    else {
       ctx.drawImage(frame, 0, 0, outputWidth, outputHeight)
     }
 
@@ -575,7 +580,8 @@ export async function generateThumbnailAt(
       return result
     }
     return null
-  } finally {
+  }
+  finally {
     generator.close()
   }
 }
@@ -597,7 +603,8 @@ export async function generateThumbnails(
       results.push(result)
     }
     return results
-  } finally {
+  }
+  finally {
     generator.close()
   }
 }
@@ -616,7 +623,8 @@ export async function generateSpriteSheet(
 
   try {
     return await generator.generate(packets, frameCount, options)
-  } finally {
+  }
+  finally {
     generator.close()
   }
 }

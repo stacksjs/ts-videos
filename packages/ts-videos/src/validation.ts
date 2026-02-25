@@ -438,7 +438,8 @@ export function validateH264Parameters(
         suggestion: 'Consider providing lower resolution variants',
       })
     }
-  } catch (_error) {
+  }
+  catch (_error) {
     issues.push({
       severity: 'warning',
       code: ValidationCodes.INVALID_SPS,
@@ -489,7 +490,8 @@ export function validateAacConfig(config: Uint8Array, profile?: ValidationProfil
         code: ValidationCodes.UNSUPPORTED_SAMPLE_RATE,
         message: `Unknown sample rate index ${freqIndex}`,
       })
-    } else {
+    }
+    else {
       const sampleRate = sampleRates[freqIndex]
       if (profile === 'web' && sampleRate !== 44100 && sampleRate !== 48000) {
         issues.push({
@@ -508,14 +510,16 @@ export function validateAacConfig(config: Uint8Array, profile?: ValidationProfil
         code: ValidationCodes.INVALID_CHANNEL_CONFIG,
         message: 'Custom channel configuration (may require additional parsing)',
       })
-    } else if (channelConfig > 7) {
+    }
+    else if (channelConfig > 7) {
       issues.push({
         severity: 'warning',
         code: ValidationCodes.INVALID_CHANNEL_CONFIG,
         message: `Channel configuration ${channelConfig} may not be widely supported`,
       })
     }
-  } catch (_error) {
+  }
+  catch (_error) {
     issues.push({
       severity: 'warning',
       code: ValidationCodes.INVALID_CONFIG,
@@ -791,7 +795,7 @@ export function validateMedia(
   options: ValidationOptions = {},
 ): ValidationResult {
   const issues: ValidationIssue[] = []
-  const streamIssues: Map<number, ValidationIssue[]> = new Map()
+  const _streamIssues: Map<number, ValidationIssue[]> = new Map()
 
   const opts: Required<ValidationOptions> = {
     checkContainer: options.checkContainer ?? true,
@@ -826,9 +830,11 @@ export function validateMedia(
   for (const profile of opts.profiles) {
     if (profile === 'web') {
       issues.push(...validateForWeb({}))
-    } else if (profile === 'streaming') {
+    }
+    else if (profile === 'streaming') {
       issues.push(...validateForStreaming({}))
-    } else if (profile === 'accessibility') {
+    }
+    else if (profile === 'accessibility') {
       issues.push(...validateForAccessibility({}))
     }
   }
@@ -938,16 +944,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (firstByte >= 0x80) {
     id = firstByte
     idLen = 1
-  } else if (firstByte >= 0x40) {
+  }
+  else if (firstByte >= 0x40) {
     id = (firstByte << 8) | data[offset + 1]
     idLen = 2
-  } else if (firstByte >= 0x20) {
+  }
+  else if (firstByte >= 0x20) {
     id = (firstByte << 16) | (data[offset + 1] << 8) | data[offset + 2]
     idLen = 3
-  } else if (firstByte >= 0x10) {
+  }
+  else if (firstByte >= 0x10) {
     id = (firstByte << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
     idLen = 4
-  } else {
+  }
+  else {
     return { id: 0, size: 0, headerSize: 0 }
   }
 
@@ -959,16 +969,20 @@ function readEbmlElement(data: Uint8Array, offset: number): { id: number; size: 
   if (sizeByte >= 0x80) {
     size = sizeByte & 0x7f
     sizeLen = 1
-  } else if (sizeByte >= 0x40) {
+  }
+  else if (sizeByte >= 0x40) {
     size = ((sizeByte & 0x3f) << 8) | data[sizeOffset + 1]
     sizeLen = 2
-  } else if (sizeByte >= 0x20) {
+  }
+  else if (sizeByte >= 0x20) {
     size = ((sizeByte & 0x1f) << 16) | (data[sizeOffset + 1] << 8) | data[sizeOffset + 2]
     sizeLen = 3
-  } else if (sizeByte >= 0x10) {
+  }
+  else if (sizeByte >= 0x10) {
     size = ((sizeByte & 0x0f) << 24) | (data[sizeOffset + 1] << 16) | (data[sizeOffset + 2] << 8) | data[sizeOffset + 3]
     sizeLen = 4
-  } else {
+  }
+  else {
     sizeLen = 1
   }
 
