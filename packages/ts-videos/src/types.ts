@@ -467,5 +467,5 @@ declare global {
 
   // VideoColorSpace var is already declared by bun
 
-  function createImageBitmap(image: Blob | ImageData | ImageBitmap | OffscreenCanvas): Promise<ImageBitmap>
+  function createImageBitmap(_image: Blob | ImageData | ImageBitmap | OffscreenCanvas): Promise<ImageBitmap>
 }

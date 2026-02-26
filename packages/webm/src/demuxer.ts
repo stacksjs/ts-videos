@@ -562,8 +562,8 @@ export class WebmDemuxer extends Demuxer {
     offset++
 
     const isKeyframe = (flags & 0x80) !== 0
-    const isInvisible = (flags & 0x08) !== 0
-    const lacing = (flags >> 1) & 0x03
+    const _isInvisible = (flags & 0x08) !== 0
+    const _lacing = (flags >> 1) & 0x03
 
     const frameData = data.subarray(offset)
 

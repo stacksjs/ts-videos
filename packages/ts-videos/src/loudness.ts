@@ -337,7 +337,7 @@ export function measureLoudnessRange(
 }
 
 /** Measure true peak using oversampling */
-export function measureTruePeak(samples: Float32Array, sampleRate: number): number {
+export function measureTruePeak(samples: Float32Array, _sampleRate: number): number {
   // Simple 4x oversampling with linear interpolation
   // A full implementation would use sinc interpolation
   const oversampleFactor = 4
