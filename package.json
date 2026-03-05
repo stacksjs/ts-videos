@@ -38,12 +38,11 @@
     "build:packages": "bun run --filter '*' build",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "test": "bun test",
-    "lint": "bunx --bun pickier lint .",
-    "lint:fix": "bunx --bun pickier lint . --fix",
+    "lint": "bunx --bun pickier .",
+    "lint:fix": "bunx --bun pickier . --fix",
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
-    "postinstall": "bunx bun-git-hooks",
     "typecheck": "bunx tsc --noEmit",
     "dev:docs": "bun --bun bunpress dev docs",
     "build:docs": "bun --bun bunpress build docs",
@@ -54,13 +53,5 @@
     "better-dx": "^0.2.5",
     "bun-plugin-dtsx": "^0.9.9",
     "pickier": "^0.1.20"
-  },
-  "git-hooks": {
-    "pre-commit": {
-      "staged-lint": {
-        "*.{js,ts,json,yaml,yml,md}": "bunx --bun pickier --fix"
-      }
-    },
-    "commit-msg": "bunx gitlint --edit .git/COMMIT_EDITMSG"
   }
 }
