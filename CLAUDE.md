@@ -2,7 +2,7 @@
 
 ## About
 
-Modern video tooling — zero dependency TypeScript media toolkit.
+vidx (ts-videos) is a lightweight TypeScript library and CLI for image optimization, manipulation, and web-optimized media processing. It provides both programmatic and command-line interfaces and is configured via a `vidx.config.ts` file. The project is still a work in progress.
 
 ## Linting
 
