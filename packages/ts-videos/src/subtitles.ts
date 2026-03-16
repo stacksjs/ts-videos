@@ -391,7 +391,7 @@ export function generateVtt(track: SubtitleTrack): string {
     if (cue.align) settings.push(`align:${cue.align}`)
 
     if (settings.length > 0) {
-      timestampLine += ' ' + settings.join(' ')
+      timestampLine += ` ${settings.join(' ')}`
     }
 
     lines.push(timestampLine)

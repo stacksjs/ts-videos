@@ -333,8 +333,8 @@ export function parseId3Apic(frameData: Uint8Array): CoverArt | null {
   // Description (null-terminated, encoding-dependent)
   let descEnd = offset
   if (isUtf16) {
-    while (descEnd < frameData.length - 1 &&
-           !(frameData[descEnd] === 0 && frameData[descEnd + 1] === 0)) {
+    while (descEnd < frameData.length - 1
+      && !(frameData[descEnd] === 0 && frameData[descEnd + 1] === 0)) {
       descEnd += 2
     }
     descEnd += 2 // Skip double null
@@ -497,8 +497,8 @@ export function createCoverArtResult(coverArt: CoverArt[]): CoverArtResult {
   }
 
   // Find front cover
-  result.frontCover = coverArt.find(c => c.type === CoverArtType.FrontCover) ??
-                       coverArt.find(c => c.type === CoverArtType.Other)
+  result.frontCover = coverArt.find(c => c.type === CoverArtType.FrontCover)
+    ?? coverArt.find(c => c.type === CoverArtType.Other)
 
   // Find back cover
   result.backCover = coverArt.find(c => c.type === CoverArtType.BackCover)

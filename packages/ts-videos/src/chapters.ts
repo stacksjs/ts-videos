@@ -819,7 +819,7 @@ function decodeId3String(data: Uint8Array, encoding: number): string {
 
 /** Create ID3v2 CHAP frame */
 export function createId3ChapFrame(chapter: Chapter, elementId: string): Uint8Array {
-  const elementIdBytes = new TextEncoder().encode(elementId + '\0')
+  const elementIdBytes = new TextEncoder().encode(`${elementId}\0`)
 
   // Create TIT2 sub-frame for title
   const titleBytes = new TextEncoder().encode(chapter.title)

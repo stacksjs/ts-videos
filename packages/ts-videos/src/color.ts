@@ -197,9 +197,9 @@ export function isHdr(colorSpace: ColorSpaceInfo): boolean {
  * Check if color space uses wide color gamut (BT.2020 or P3)
  */
 export function isWideColorGamut(colorSpace: ColorSpaceInfo): boolean {
-  return colorSpace.primaries === ColorPrimaries.BT2020 ||
-    colorSpace.primaries === ColorPrimaries.SMPTEST431 ||
-         colorSpace.primaries === ColorPrimaries.SMPTEST432
+  return colorSpace.primaries === ColorPrimaries.BT2020
+    || colorSpace.primaries === ColorPrimaries.SMPTEST431
+    || colorSpace.primaries === ColorPrimaries.SMPTEST432
 }
 
 /**

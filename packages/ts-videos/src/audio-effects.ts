@@ -166,7 +166,7 @@ export class BiquadFilter implements AudioEffect {
       const x0 = samples[i]
 
       const y0 = this.b0 * x0 + this.b1 * this.x1[ch] + this.b2 * this.x2[ch]
-                 - this.a1 * this.y1[ch] - this.a2 * this.y2[ch]
+        - this.a1 * this.y1[ch] - this.a2 * this.y2[ch]
 
       this.x2[ch] = this.x1[ch]
       this.x1[ch] = x0
