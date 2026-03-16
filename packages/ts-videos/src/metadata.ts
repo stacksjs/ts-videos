@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Metadata reading and writing for various media formats
  * Supports MP4, WebM/Matroska, ID3v2 (MP3), Vorbis Comments (FLAC/OGG)

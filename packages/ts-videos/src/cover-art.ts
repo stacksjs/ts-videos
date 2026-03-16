@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Cover art extraction and handling utilities
  * Similar to mediabunny's cover art system

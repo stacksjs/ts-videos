@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Audio effects for processing audio samples
  * Provides EQ, compressor, limiter, reverb, delay, and pitch shifting

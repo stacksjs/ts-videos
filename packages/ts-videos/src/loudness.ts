@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Loudness measurement and normalization
  * Implements EBU R128 / ITU-R BS.1770 standards

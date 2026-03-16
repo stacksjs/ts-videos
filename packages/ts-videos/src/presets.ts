@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Encoding presets for common platforms and use cases
  * Pre-configured settings for YouTube, Twitter, Instagram, etc.

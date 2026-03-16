@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * DASH (Dynamic Adaptive Streaming over HTTP) manifest generation
  * Generates MPD (Media Presentation Description) files

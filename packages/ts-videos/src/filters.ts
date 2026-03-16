@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Video filters for frame processing
  * Provides scale, crop, rotate, overlay, and color adjustment filters

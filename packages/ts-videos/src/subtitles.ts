@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Subtitle support for reading and writing various subtitle formats
  * Supports SRT, VTT, ASS/SSA, TTML, and embedded subtitles
@@ -724,7 +724,7 @@ export function parseTtml(content: string): SubtitleTrack {
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'")
+      .replace(/&apos;/g, '\'')
       .trim()
 
     if (text) {

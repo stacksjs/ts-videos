@@ -1,3 +1,4 @@
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Chapter support for reading and writing media chapters
  * Supports MP4/M4A, Matroska/WebM, and ID3 chapter formats
@@ -907,12 +908,14 @@ export function parseCueSheet(text: string): ChapterList {
       continue
     }
 
+    // eslint-disable-next-line general/prefer-template
     const titleMatch = trimmed.match(/^TITLE\s+"([^"]+)"$/i)
     if (titleMatch && currentTrack) {
       currentTrack.title = titleMatch[1]
       continue
     }
 
+    // eslint-disable-next-line general/prefer-template
     const performerMatch = trimmed.match(/^PERFORMER\s+"([^"]+)"$/i)
     if (performerMatch && currentTrack) {
       currentTrack.metadata = currentTrack.metadata || {}

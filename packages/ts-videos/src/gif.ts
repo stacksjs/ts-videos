@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * GIF generation from video frames
  * Uses ts-gif for encoding with additional video-specific utilities

@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Scene detection for video analysis
  * Detects cuts, fades, and dissolves using various algorithms

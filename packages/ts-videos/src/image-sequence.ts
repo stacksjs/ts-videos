@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Image sequence support for reading and writing frame sequences
  * Supports common image formats (PNG, JPEG, WebP, BMP, TIFF)

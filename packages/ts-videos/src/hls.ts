@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * HLS (HTTP Live Streaming) manifest generation
  * Generates M3U8 playlists for HLS streaming

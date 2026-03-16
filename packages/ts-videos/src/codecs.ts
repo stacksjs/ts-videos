@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Codec configuration parsing for H.264, H.265, and AAC
  * Parses parameter sets and extracts codec metadata

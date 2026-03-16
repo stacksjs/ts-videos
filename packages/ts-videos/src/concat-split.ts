@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Concatenation and splitting utilities for media files
  * Join multiple files or split files at specific points
@@ -339,7 +339,7 @@ export function generateConcatList(
   if (format === 'ffmpeg') {
     // FFmpeg concat demuxer format
     const lines = filePaths.map((path) => {
-      const escaped = path.replace(/'/g, "'\\''")
+      const escaped = path.replace(/'/g, '\'\\\'\'')
       return `file '${escaped}'`
     })
     return lines.join('\n')

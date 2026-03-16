@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Media validation utilities for checking file integrity and compliance
  * Validates container structure, codec parameters, and stream synchronization

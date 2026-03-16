@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Streaming enhancements for media processing
  * Provides append-only modes, chunked output, and streaming utilities

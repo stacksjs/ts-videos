@@ -1,4 +1,4 @@
-/* eslint-disable style/max-statements-per-line */
+/* eslint-disable style/max-statements-per-line, max-statements-per-line */
 /**
  * Thumbnail and frame extraction utilities
  * Similar to mediabunny's thumbnail generation system
