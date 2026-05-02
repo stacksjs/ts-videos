@@ -96,6 +96,7 @@ cli
         case 'mp4':
         case 'm4v':
         case 'm4a':
+          // @ts-expect-error - optional peer dependency
           const { Mp4OutputFormat } = await import('@ts-videos/mp4')
           outputFormat = new Mp4OutputFormat({ fastStart: options.fastStart as boolean })
           break
