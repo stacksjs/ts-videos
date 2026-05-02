@@ -522,7 +522,9 @@ export function coverArtToDataUrl(coverArt: CoverArt): string {
  * Convert cover art to Blob
  */
 export function coverArtToBlob(coverArt: CoverArt): Blob {
-  return new Blob([coverArt.data], { type: coverArt.mimeType })
+  // Re-wrap to land on `Uint8Array<ArrayBuffer>` (Blob's `BlobPart` rejects
+  // the SharedArrayBuffer-compatible variant we get by default).
+  return new Blob([new Uint8Array(coverArt.data)], { type: coverArt.mimeType })
 }
 
 /**

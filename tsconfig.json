@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "moduleDetection": "force",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -18,7 +18,12 @@
     "isolatedDeclarations": true,
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "ts-videos": ["./packages/ts-videos/src/index.ts"],
+      "ts-videos/*": ["./packages/ts-videos/src/*.ts"]
+    }
   },
   "exclude": ["**/dist/**", "**/node_modules/**"]
 }

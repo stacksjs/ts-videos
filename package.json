@@ -56,7 +56,7 @@
   },
   "git-hooks": {
     "pre-commit": {
-      "staged-lint": {
+      "stagedLint": {
         "*.{js,ts,json,yaml,yml,md}": "bunx --bun pickier lint --fix"
       }
     },

@@ -373,14 +373,20 @@ export function createDefaultHdr10Metadata(): HdrMetadata {
  * Create WebCodecs VideoColorSpaceInit from color space info
  */
 export function toVideoColorSpaceInit(colorSpace: ColorSpaceInfo): VideoColorSpaceInit {
-  const primariesMap: Record<number, VideoColorPrimaries> = {
+  // lib.dom.d.ts hasn't caught up with the full WebCodecs spec — the
+  // narrow union types it ships for `VideoColorPrimaries`, `VideoTransfer
+  // Characteristics`, and `VideoMatrixCoefficients` omit values like
+  // 'bt2020', 'linear', 'pq', 'hlg', 'bt2020-ncl' that are valid per the
+  // spec and produced by real-world streams. Use `string` internally and
+  // cast once at the boundary.
+  const primariesMap: Record<number, string> = {
     [ColorPrimaries.BT709]: 'bt709',
     [ColorPrimaries.BT470BG]: 'bt470bg',
     [ColorPrimaries.SMPTE170M]: 'smpte170m',
     [ColorPrimaries.BT2020]: 'bt2020',
   }
 
-  const transferMap: Record<number, VideoTransferCharacteristics> = {
+  const transferMap: Record<number, string> = {
     [TransferCharacteristics.BT709]: 'bt709',
     [TransferCharacteristics.SMPTE170M]: 'smpte170m',
     [TransferCharacteristics.IEC61966_2_1]: 'iec61966-2-1',
@@ -389,7 +395,7 @@ export function toVideoColorSpaceInit(colorSpace: ColorSpaceInfo): VideoColorSpa
     [TransferCharacteristics.ARIB_STD_B67]: 'hlg',
   }
 
-  const matrixMap: Record<number, VideoMatrixCoefficients> = {
+  const matrixMap: Record<number, string> = {
     [MatrixCoefficients.Identity]: 'rgb',
     [MatrixCoefficients.BT709]: 'bt709',
     [MatrixCoefficients.BT470BG]: 'bt470bg',
@@ -398,9 +404,9 @@ export function toVideoColorSpaceInit(colorSpace: ColorSpaceInfo): VideoColorSpa
   }
 
   return {
-    primaries: primariesMap[colorSpace.primaries],
-    transfer: transferMap[colorSpace.transfer],
-    matrix: matrixMap[colorSpace.matrix],
+    primaries: primariesMap[colorSpace.primaries] as VideoColorPrimaries,
+    transfer: transferMap[colorSpace.transfer] as VideoTransferCharacteristics,
+    matrix: matrixMap[colorSpace.matrix] as VideoMatrixCoefficients,
     fullRange: colorSpace.range === ColorRange.Full,
   }
 }
