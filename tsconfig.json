@@ -19,7 +19,6 @@
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "ts-videos": ["./packages/ts-videos/src/index.ts"],
       "ts-videos/*": ["./packages/ts-videos/src/*.ts"]
