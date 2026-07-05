@@ -81,62 +81,249 @@ export function detectChapterFormat(data: Uint8Array): ChapterFormat | null {
 // MP4/M4A Chapter Parsing
 // ============================================================================
 
-/** Parse chapters from MP4/M4A data */
-export function parseMp4Chapters(data: Uint8Array): ChapterList {
+/** Content bounds of an MP4 box within a buffer */
+interface Mp4BoxRef {
+  type: string
+  /** Offset of the box content (after the header), relative to the buffer */
+  start: number
+  /** Offset of the end of the box, relative to the buffer */
+  end: number
+}
+
+/** Iterate child boxes within [start, end) of `data`, handling 64-bit and to-end sizes */
+function* iterMp4Boxes(data: Uint8Array, start: number, end: number): Generator<Mp4BoxRef> {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+  let offset = start
+  while (offset + 8 <= end) {
+    let size = view.getUint32(offset)
+    const type = String.fromCharCode(data[offset + 4], data[offset + 5], data[offset + 6], data[offset + 7])
+    let headerSize = 8
+    if (size === 1) {
+      // 64-bit largesize (e.g. mdat in files over 4GB)
+      if (offset + 16 > end) break
+      size = Number(view.getBigUint64(offset + 8))
+      headerSize = 16
+    }
+    else if (size === 0) {
+      // Box extends to the end of the enclosing container
+      size = end - offset
+    }
+    if (size < headerSize || offset + size > end) break
+    yield { type, start: offset + headerSize, end: offset + size }
+    offset += size
+  }
+}
+
+function findMp4Box(data: Uint8Array, start: number, end: number, type: string): Mp4BoxRef | null {
+  for (const box of iterMp4Boxes(data, start, end)) {
+    if (box.type === type) return box
+  }
+  return null
+}
+
+/** Decode the packed 15-bit ISO-639-2 language code from mdhd */
+function decodeMp4Language(bits: number): string | undefined {
+  const code = String.fromCharCode(
+    ((bits >> 10) & 0x1F) + 0x60,
+    ((bits >> 5) & 0x1F) + 0x60,
+    (bits & 0x1F) + 0x60,
+  )
+  return /^[a-z]{3}$/.test(code) ? code : undefined
+}
+
+/**
+ * Read a QuickTime text sample: 2-byte big-endian length followed by the
+ * title text (UTF-8, or UTF-16 when a BOM is present). Returns null when the
+ * sample lies outside the buffer (e.g. only the moov box was provided).
+ */
+function readMp4TextSample(data: Uint8Array, offset: number, size: number): string | null {
+  if (offset < 0 || size < 2 || offset + size > data.length) return null
+  const length = (data[offset] << 8) | data[offset + 1]
+  if (length + 2 > size) return null
+  const text = data.subarray(offset + 2, offset + 2 + length)
+  if (length >= 2 && text[0] === 0xFE && text[1] === 0xFF) {
+    // UTF-16 BE: swap to LE for TextDecoder
+    const swapped = new Uint8Array(length - 2)
+    for (let i = 2; i + 1 < length; i += 2) {
+      swapped[i - 2] = text[i + 1]
+      swapped[i - 1] = text[i]
+    }
+    return new TextDecoder('utf-16le').decode(swapped)
+  }
+  if (length >= 2 && text[0] === 0xFF && text[1] === 0xFE) {
+    return new TextDecoder('utf-16le').decode(text.subarray(2))
+  }
+  return new TextDecoder('utf-8').decode(text)
+}
+
+/**
+ * Parse the chapters of a QuickTime chapter text track by walking its sample
+ * tables: stts (timing), stsc (sample-to-chunk), stsz (sizes) and stco/co64
+ * (chunk offsets). Chunk offsets are absolute file positions, so titles can
+ * only be read when `data` is the whole file; otherwise generic titles are
+ * produced with correct timing.
+ */
+function parseMp4ChapterTrak(data: Uint8Array, trak: Mp4BoxRef): Chapter[] {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+
+  const mdia = findMp4Box(data, trak.start, trak.end, 'mdia')
+  if (!mdia) return []
+  const mdhd = findMp4Box(data, mdia.start, mdia.end, 'mdhd')
+  if (!mdhd) return []
+  const mdhdVersion = data[mdhd.start]
+  const timescale = mdhdVersion === 1 ? view.getUint32(mdhd.start + 20) : view.getUint32(mdhd.start + 12)
+  const language = decodeMp4Language(view.getUint16(mdhdVersion === 1 ? mdhd.start + 32 : mdhd.start + 20))
+  if (timescale === 0) return []
+
+  const minf = findMp4Box(data, mdia.start, mdia.end, 'minf')
+  if (!minf) return []
+  const stbl = findMp4Box(data, minf.start, minf.end, 'stbl')
+  if (!stbl) return []
+  const stts = findMp4Box(data, stbl.start, stbl.end, 'stts')
+  const stsz = findMp4Box(data, stbl.start, stbl.end, 'stsz')
+  const stsc = findMp4Box(data, stbl.start, stbl.end, 'stsc')
+  const stco = findMp4Box(data, stbl.start, stbl.end, 'stco')
+  const co64 = findMp4Box(data, stbl.start, stbl.end, 'co64')
+  if (!stts || !stsz || !stsc || (!stco && !co64)) return []
+
+  // stsz: sample sizes
+  const defaultSampleSize = view.getUint32(stsz.start + 4)
+  const sampleCount = view.getUint32(stsz.start + 8)
+  if (sampleCount === 0) return []
+  if (defaultSampleSize === 0 && stsz.start + 12 + sampleCount * 4 > stsz.end) return []
+  const sizes: number[] = []
+  for (let i = 0; i < sampleCount; i++) {
+    sizes.push(defaultSampleSize !== 0 ? defaultSampleSize : view.getUint32(stsz.start + 12 + i * 4))
+  }
+
+  // stts: per-sample durations (in track timescale units)
+  const sttsCount = view.getUint32(stts.start + 4)
+  if (stts.start + 8 + sttsCount * 8 > stts.end) return []
+  const durations: number[] = []
+  for (let i = 0; i < sttsCount && durations.length < sampleCount; i++) {
+    const count = view.getUint32(stts.start + 8 + i * 8)
+    const delta = view.getUint32(stts.start + 12 + i * 8)
+    for (let j = 0; j < count && durations.length < sampleCount; j++) durations.push(delta)
+  }
+
+  // stsc: samples per chunk
+  const stscCount = view.getUint32(stsc.start + 4)
+  if (stsc.start + 8 + stscCount * 12 > stsc.end) return []
+  const stscEntries: { firstChunk: number, samplesPerChunk: number }[] = []
+  for (let i = 0; i < stscCount; i++) {
+    stscEntries.push({
+      firstChunk: view.getUint32(stsc.start + 8 + i * 12),
+      samplesPerChunk: view.getUint32(stsc.start + 12 + i * 12),
+    })
+  }
+
+  // stco/co64: absolute file offsets of each chunk
+  const chunkOffsets: number[] = []
+  if (stco) {
+    const count = view.getUint32(stco.start + 4)
+    if (stco.start + 8 + count * 4 > stco.end) return []
+    for (let i = 0; i < count; i++) chunkOffsets.push(view.getUint32(stco.start + 8 + i * 4))
+  }
+  else if (co64) {
+    const count = view.getUint32(co64.start + 4)
+    if (co64.start + 8 + count * 8 > co64.end) return []
+    for (let i = 0; i < count; i++) chunkOffsets.push(Number(view.getBigUint64(co64.start + 8 + i * 8)))
+  }
+
+  // Resolve the absolute file offset of every sample
+  const sampleOffsets: number[] = []
+  let sampleIndex = 0
+  for (let chunkIndex = 0; chunkIndex < chunkOffsets.length && sampleIndex < sampleCount; chunkIndex++) {
+    let samplesPerChunk = 1
+    for (const entry of stscEntries) {
+      if (entry.firstChunk <= chunkIndex + 1) samplesPerChunk = entry.samplesPerChunk
+      else break
+    }
+    let sampleOffset = chunkOffsets[chunkIndex]
+    for (let i = 0; i < samplesPerChunk && sampleIndex < sampleCount; i++) {
+      sampleOffsets.push(sampleOffset)
+      sampleOffset += sizes[sampleIndex]
+      sampleIndex++
+    }
+  }
+
   const chapters: Chapter[] = []
-  let offset = 0
+  let time = 0
+  const lastDelta = durations[durations.length - 1] ?? 0
+  for (let i = 0; i < sampleCount; i++) {
+    const startTime = Math.round((time / timescale) * 1000)
+    time += durations[i] ?? lastDelta
+    const title = readMp4TextSample(data, sampleOffsets[i] ?? -1, sizes[i])
+    chapters.push({
+      startTime,
+      endTime: Math.round((time / timescale) * 1000),
+      title: title ?? `Chapter ${i + 1}`,
+      ...(language ? { language } : {}),
+    })
+  }
+  return chapters
+}
 
-  // Find moov box
-  while (offset < data.length - 8) {
-    const size = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    const type = String.fromCharCode(data[offset + 4], data[offset + 5], data[offset + 6], data[offset + 7])
+/**
+ * Parse chapters from MP4/M4A data.
+ *
+ * Supports QuickTime chapter text tracks (a text track referenced by an audio
+ * or video track's tref/chap box — the format written by Mp4Muxer.addChapter
+ * and used by iTunes/Apple Books) as well as Nero chpl boxes. Pass the whole
+ * file so chapter titles can be read from mdat; passing only the moov box
+ * still yields correct chapter timing with generic titles.
+ */
+export function parseMp4Chapters(data: Uint8Array): ChapterList {
+  const moov = findMp4Box(data, 0, data.length, 'moov')
+  if (!moov) return { chapters: [] }
 
-    if (type === 'moov') {
-      parsemp4MoovBox(data.slice(offset + 8, offset + size), chapters)
-      break
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+
+  // Gather all traks, their track ids, handlers and tref/chap references
+  interface TrakInfo { trak: Mp4BoxRef, trackId: number, handler: string }
+  const traks: TrakInfo[] = []
+  const chapterTrackIds = new Set<number>()
+
+  for (const trak of iterMp4Boxes(data, moov.start, moov.end)) {
+    if (trak.type !== 'trak') continue
+    const tkhd = findMp4Box(data, trak.start, trak.end, 'tkhd')
+    const mdia = findMp4Box(data, trak.start, trak.end, 'mdia')
+    if (!tkhd || !mdia) continue
+    const tkhdVersion = data[tkhd.start]
+    const trackId = view.getUint32(tkhd.start + (tkhdVersion === 1 ? 20 : 12))
+    const hdlr = findMp4Box(data, mdia.start, mdia.end, 'hdlr')
+    const handler = hdlr
+      ? String.fromCharCode(data[hdlr.start + 8], data[hdlr.start + 9], data[hdlr.start + 10], data[hdlr.start + 11])
+      : ''
+    traks.push({ trak, trackId, handler })
+
+    const tref = findMp4Box(data, trak.start, trak.end, 'tref')
+    if (tref) {
+      const chap = findMp4Box(data, tref.start, tref.end, 'chap')
+      if (chap) {
+        for (let o = chap.start; o + 4 <= chap.end; o += 4) chapterTrackIds.add(view.getUint32(o))
+      }
     }
-
-    offset += size
-    if (size === 0) break
   }
 
+  // Prefer traks explicitly referenced via tref/chap; fall back to text tracks
+  let chapterTraks = traks.filter(t => chapterTrackIds.has(t.trackId))
+  if (chapterTraks.length === 0) {
+    chapterTraks = traks.filter(t => t.handler === 'text' || t.handler === 'sbtl')
+  }
+  for (const t of chapterTraks) {
+    const chapters = parseMp4ChapterTrak(data, t.trak)
+    if (chapters.length > 0) return { chapters }
+  }
+
+  // Nero chapter format fallback
+  const chapters: Chapter[] = []
+  const udta = findMp4Box(data, moov.start, moov.end, 'udta')
+  if (udta) {
+    const chpl = findMp4Box(data, udta.start, udta.end, 'chpl')
+    if (chpl) parseMp4ChplBox(data.slice(chpl.start, chpl.end), chapters)
+  }
   return { chapters }
-}
-
-function parsemp4MoovBox(data: Uint8Array, chapters: Chapter[]): void {
-  let offset = 0
-
-  while (offset < data.length - 8) {
-    const size = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    const type = String.fromCharCode(data[offset + 4], data[offset + 5], data[offset + 6], data[offset + 7])
-
-    if (type === 'udta') {
-      parseMp4UdtaBox(data.slice(offset + 8, offset + size), chapters)
-    }
-    else if (type === 'trak') {
-      parseMp4TrakBox(data.slice(offset + 8, offset + size), chapters)
-    }
-
-    offset += size
-    if (size === 0) break
-  }
-}
-
-function parseMp4UdtaBox(data: Uint8Array, chapters: Chapter[]): void {
-  let offset = 0
-
-  while (offset < data.length - 8) {
-    const size = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    const type = String.fromCharCode(data[offset + 4], data[offset + 5], data[offset + 6], data[offset + 7])
-
-    if (type === 'chpl') {
-      // Nero chapter format
-      parseMp4ChplBox(data.slice(offset + 8, offset + size), chapters)
-    }
-
-    offset += size
-    if (size === 0) break
-  }
 }
 
 function parseMp4ChplBox(data: Uint8Array, chapters: Chapter[]): void {
@@ -176,90 +363,6 @@ function parseMp4ChplBox(data: Uint8Array, chapters: Chapter[]): void {
   for (let i = 0; i < chapters.length - 1; i++) {
     chapters[i].endTime = chapters[i + 1].startTime
   }
-}
-
-function parseMp4TrakBox(data: Uint8Array, chapters: Chapter[]): void {
-  // Check if this is a chapter track (text handler)
-  let offset = 0
-
-  while (offset < data.length - 8) {
-    const size = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    const type = String.fromCharCode(data[offset + 4], data[offset + 5], data[offset + 6], data[offset + 7])
-
-    if (type === 'mdia') {
-      const mdiaData = data.slice(offset + 8, offset + size)
-      const isChapterTrack = checkMp4ChapterTrack(mdiaData)
-      if (isChapterTrack) {
-        parseMp4MdiaForChapters(mdiaData, chapters)
-      }
-    }
-
-    offset += size
-    if (size === 0) break
-  }
-}
-
-function checkMp4ChapterTrack(mdiaData: Uint8Array): boolean {
-  let offset = 0
-
-  while (offset < mdiaData.length - 8) {
-    const size = (mdiaData[offset] << 24) | (mdiaData[offset + 1] << 16) | (mdiaData[offset + 2] << 8) | mdiaData[offset + 3]
-    const type = String.fromCharCode(mdiaData[offset + 4], mdiaData[offset + 5], mdiaData[offset + 6], mdiaData[offset + 7])
-
-    if (type === 'hdlr') {
-      // Check handler type
-      const handlerType = String.fromCharCode(
-        mdiaData[offset + 16],
-        mdiaData[offset + 17],
-        mdiaData[offset + 18],
-        mdiaData[offset + 19],
-      )
-      return handlerType === 'text' || handlerType === 'sbtl'
-    }
-
-    offset += size
-    if (size === 0) break
-  }
-
-  return false
-}
-
-function parseMp4MdiaForChapters(mdiaData: Uint8Array, chapters: Chapter[]): void {
-  let offset = 0
-
-  while (offset < mdiaData.length - 8) {
-    const size = (mdiaData[offset] << 24) | (mdiaData[offset + 1] << 16) | (mdiaData[offset + 2] << 8) | mdiaData[offset + 3]
-    const type = String.fromCharCode(mdiaData[offset + 4], mdiaData[offset + 5], mdiaData[offset + 6], mdiaData[offset + 7])
-
-    if (type === 'minf') {
-      parseMp4MinfForChapters(mdiaData.slice(offset + 8, offset + size), chapters)
-    }
-
-    offset += size
-    if (size === 0) break
-  }
-}
-
-function parseMp4MinfForChapters(minfData: Uint8Array, chapters: Chapter[]): void {
-  let offset = 0
-
-  while (offset < minfData.length - 8) {
-    const size = (minfData[offset] << 24) | (minfData[offset + 1] << 16) | (minfData[offset + 2] << 8) | minfData[offset + 3]
-    const type = String.fromCharCode(minfData[offset + 4], minfData[offset + 5], minfData[offset + 6], minfData[offset + 7])
-
-    if (type === 'stbl') {
-      parseMp4StblForChapters(minfData.slice(offset + 8, offset + size), chapters)
-    }
-
-    offset += size
-    if (size === 0) break
-  }
-}
-
-function parseMp4StblForChapters(_stblData: Uint8Array, _chapters: Chapter[]): void {
-  // Extract sample timing and text content
-  // This requires coordinating stts (timing), stsz (sizes), stco (chunk offsets)
-  // Simplified implementation - would need full sample table parsing for complete support
 }
 
 /** Create MP4 chapter atom (chpl box) */
