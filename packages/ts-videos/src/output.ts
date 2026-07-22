@@ -5,7 +5,7 @@
 import type { Target } from './writer'
 import type { VideoTrackConfig, AudioTrackConfig, SubtitleTrackConfig, EncodedPacket, Metadata } from './types'
 import type { Muxer, OutputFormat, OutputVideoTrack, OutputAudioTrack, OutputSubtitleTrack } from './muxer'
-import { createTarget } from './target'
+import { BufferTarget, createTarget } from './target'
 
 export interface OutputOptions {
   format: OutputFormat
@@ -112,7 +112,8 @@ export class Output {
     }
 
     const muxer = this.getMuxer()
-    return muxer.finalize()
+    const bytes = await muxer.finalize()
+    return this.target instanceof BufferTarget ? this.target.buffer : bytes
   }
 
   async close(): Promise<void> {
