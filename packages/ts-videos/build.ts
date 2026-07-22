@@ -20,7 +20,7 @@ await Bun.build({
   target: 'node',
   minify: true,
   splitting: true,
-  external: ['ts-audio', 'ts-gif', 'bunfig'],
+  external: ['ts-gif', 'bunfig'],
   plugins: [dts()],
 })
 
@@ -31,7 +31,7 @@ await Bun.build({
   format: 'esm',
   target: 'node',
   minify: true,
-  external: ['ts-audio', 'ts-gif', 'bunfig'],
+  external: ['ts-gif', 'bunfig'],
 })
 
 // Add shebang to CLI

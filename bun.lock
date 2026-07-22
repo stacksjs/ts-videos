@@ -43,7 +43,6 @@
       "optionalDependencies": {
         "@ts-videos/mp4": "workspace:*",
         "@ts-videos/webm": "workspace:*",
-        "ts-audio": "link:ts-audio",
       },
     },
     "packages/webm": {

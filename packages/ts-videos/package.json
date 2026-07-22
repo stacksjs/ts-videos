@@ -232,8 +232,7 @@
   },
   "optionalDependencies": {
     "@ts-videos/mp4": "workspace:*",
-    "@ts-videos/webm": "workspace:*",
-    "ts-audio": "link:ts-audio"
+    "@ts-videos/webm": "workspace:*"
   },
   "dependencies": {
     "bunfig": "^0.15.6"
