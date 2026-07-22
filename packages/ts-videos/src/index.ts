@@ -5,6 +5,7 @@ export { config } from './config'
 export * from './types'
 export * from './delivery'
 export * from './protected-delivery'
+export * from './native-transcode'
 
 // Utilities
 export * from './utils'

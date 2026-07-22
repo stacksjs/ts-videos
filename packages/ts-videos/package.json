@@ -122,6 +122,10 @@
       "types": "./dist/metadata.d.ts",
       "import": "./dist/metadata.js"
     },
+    "./native-transcode": {
+      "types": "./dist/native-transcode.d.ts",
+      "import": "./dist/native-transcode.js"
+    },
     "./muxer": {
       "types": "./dist/muxer.d.ts",
       "import": "./dist/muxer.js"
