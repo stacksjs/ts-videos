@@ -227,13 +227,13 @@ export function readEbmlSize(data: Uint8Array, offset: number): { size: number, 
 }
 
 export function writeEbmlId(id: number): Uint8Array {
-  if (id <= 0x7F) {
+  if (id <= 0xFF) {
     return new Uint8Array([id])
   }
-  else if (id <= 0x3FFF) {
+  else if (id <= 0xFFFF) {
     return new Uint8Array([(id >> 8), id & 0xFF])
   }
-  else if (id <= 0x1FFFFF) {
+  else if (id <= 0xFFFFFF) {
     return new Uint8Array([(id >> 16), (id >> 8) & 0xFF, id & 0xFF])
   }
   else {

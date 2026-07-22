@@ -63,6 +63,9 @@ export class WebmMuxer extends Muxer {
     else if (track.type === 'audio') {
       codecId = this.getAudioCodecId(track.config.codec)
     }
+    else {
+      codecId = this.getSubtitleCodecId(track.config.codec)
+    }
 
     this.trackData.set(track.id, {
       track,
@@ -204,6 +207,9 @@ export class WebmMuxer extends Muxer {
     }
     else {
       elements.push(this.createEbmlElement(EBML_IDS.TrackType, writeEbmlUint(TRACK_TYPES.SUBTITLE)))
+      if (track.config.language) {
+        elements.push(this.createEbmlElement(EBML_IDS.Language, writeEbmlString(track.config.language)))
+      }
     }
 
     const entryContent = concatBytes(...elements)
@@ -220,6 +226,16 @@ export class WebmMuxer extends Muxer {
 
   protected async writeSubtitlePacket(track: OutputSubtitleTrack, packet: EncodedPacket): Promise<void> {
     await this.writeBlock(track.id, packet)
+  }
+
+  private getSubtitleCodecId(codec: string): string {
+    switch (codec) {
+      case 'webvtt': return CODEC_IDS.WEBVTT_SUBTITLES
+      case 'srt': return 'S_TEXT/UTF8'
+      case 'ass': return 'S_TEXT/ASS'
+      case 'ssa': return 'S_TEXT/SSA'
+      default: throw new Error(`Unsupported Matroska subtitle codec: ${codec}`)
+    }
   }
 
   private async writeBlock(trackId: number, packet: EncodedPacket): Promise<void> {
@@ -239,18 +255,41 @@ export class WebmMuxer extends Muxer {
     }
 
     const relativeTimestamp = timestampMs - this.currentCluster.timestamp
-    const block = this.createSimpleBlock(data.number, relativeTimestamp, packet)
+    const block = data.track.type === 'subtitle' && (packet.duration ?? 0) > 0
+      ? this.createBlockGroup(data.number, relativeTimestamp, packet)
+      : this.createSimpleBlock(data.number, relativeTimestamp, packet)
     this.currentCluster.blocks.push(block)
   }
 
+  private createBlockGroup(trackNumber: number, relativeTimestamp: number, packet: EncodedPacket): Uint8Array {
+    const block = this.createBlockPayload(trackNumber, relativeTimestamp, packet, false)
+    const duration = Math.max(1, Math.round((packet.duration ?? 0) * 1000))
+    return this.createEbmlElement(EBML_IDS.BlockGroup, concatBytes(
+      this.createEbmlElement(EBML_IDS.Block, block),
+      this.createEbmlElement(EBML_IDS.BlockDuration, writeEbmlUint(duration)),
+    ))
+  }
+
   private createSimpleBlock(trackNumber: number, relativeTimestamp: number, packet: EncodedPacket): Uint8Array {
+    return this.createEbmlElement(
+      EBML_IDS.SimpleBlock,
+      this.createBlockPayload(trackNumber, relativeTimestamp, packet, true),
+    )
+  }
+
+  private createBlockPayload(
+    trackNumber: number,
+    relativeTimestamp: number,
+    packet: EncodedPacket,
+    includeKeyframeFlag: boolean,
+  ): Uint8Array {
     const trackNumBytes = writeEbmlSize(trackNumber)
 
     const timecodeHi = (relativeTimestamp >> 8) & 0xFF
     const timecodeLo = relativeTimestamp & 0xFF
 
     let flags = 0
-    if (packet.isKeyframe) flags |= 0x80
+    if (includeKeyframeFlag && packet.isKeyframe) flags |= 0x80
 
     const header = new Uint8Array([
       ...trackNumBytes,
@@ -259,8 +298,7 @@ export class WebmMuxer extends Muxer {
       flags,
     ])
 
-    const blockData = concatBytes(header, packet.data)
-    return this.createEbmlElement(EBML_IDS.SimpleBlock, blockData)
+    return concatBytes(header, packet.data)
   }
 
   private async flushCluster(): Promise<void> {

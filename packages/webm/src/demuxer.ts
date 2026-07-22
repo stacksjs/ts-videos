@@ -2,7 +2,7 @@
  * WebM/Matroska demuxer implementation
  */
 
-import type { Source, Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec } from 'ts-videos'
+import type { Source, Track, VideoTrack, AudioTrack, SubtitleTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec, SubtitleCodec } from 'ts-videos'
 import { Demuxer, Reader } from 'ts-videos'
 import {
   EBML_IDS, TRACK_TYPES, CODEC_IDS, CONTAINER_ELEMENTS,
@@ -422,6 +422,19 @@ export class WebmDemuxer extends Demuxer {
         }
         this._tracks.push(track)
       }
+      else if (info.type === TRACK_TYPES.SUBTITLE) {
+        const track: SubtitleTrack = {
+          type: 'subtitle',
+          id: info.id,
+          index: i,
+          codec: this.getSubtitleCodec(info.codecId),
+          language: info.language,
+          title: info.name,
+          isDefault: info.isDefault,
+          codecDescription: info.codecPrivate,
+        }
+        this._tracks.push(track)
+      }
     }
 
     this._duration = this.duration * this.timestampScale / 1000000000
@@ -449,6 +462,20 @@ export class WebmDemuxer extends Demuxer {
       case CODEC_IDS.FLAC: return 'flac'
       case CODEC_IDS.PCM_INT_LE: return 'pcm_s16le'
       case CODEC_IDS.PCM_INT_BE: return 'pcm_s16be'
+      default: return 'unknown'
+    }
+  }
+
+  private getSubtitleCodec(codecId: string): SubtitleCodec {
+    switch (codecId) {
+      case CODEC_IDS.WEBVTT_SUBTITLES:
+      case CODEC_IDS.WEBVTT_CAPTIONS:
+      case CODEC_IDS.WEBVTT_DESCRIPTIONS:
+      case CODEC_IDS.WEBVTT_METADATA:
+        return 'webvtt'
+      case 'S_TEXT/UTF8': return 'srt'
+      case 'S_TEXT/ASS': return 'ass'
+      case 'S_TEXT/SSA': return 'ssa'
       default: return 'unknown'
     }
   }
