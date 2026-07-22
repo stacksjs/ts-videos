@@ -3,7 +3,7 @@
  */
 
 import type { Source } from 'ts-videos/reader'
-import type { Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec } from 'ts-videos/types'
+import type { Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec, ColorSpace } from 'ts-videos/types'
 import { Demuxer } from 'ts-videos/demuxer'
 import { Reader } from 'ts-videos/reader'
 import type {
@@ -306,6 +306,7 @@ export class Mp4Demuxer extends Demuxer {
         isDefault: (tkhd.flags & 0x1) !== 0,
         language: mdhd.language,
         codecDescription: this.extractCodecDescription(entry),
+        colorSpace: this.extractColorSpace(entry),
         rotation: this.getRotation(tkhd.matrix),
       }
       return track
@@ -509,6 +510,41 @@ export class Mp4Demuxer extends Demuxer {
         return 'mpeg4'
       default:
         return 'unknown'
+    }
+  }
+
+  private extractColorSpace(entry: VideoSampleEntry): ColorSpace | undefined {
+    const data = entry.extensions.find(extension => extension.type === 'colr')?.data
+    if (!data || data.length < 11) return undefined
+
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+    if (readFourCC(view, 0) !== 'nclx') return undefined
+    const primaries = new Map<number, NonNullable<ColorSpace['primaries']>>([
+      [1, 'bt709'], [4, 'bt470m'], [5, 'bt470bg'], [6, 'smpte170m'],
+      [7, 'smpte240m'], [8, 'film'], [9, 'bt2020'], [10, 'smpte428'],
+      [11, 'smpte431'], [12, 'smpte432'], [22, 'ebu3213'],
+    ]).get(view.getUint16(4))
+    const transfer = new Map<number, NonNullable<ColorSpace['transfer']>>([
+      [1, 'bt709'], [4, 'bt470m'], [5, 'bt470bg'], [6, 'smpte170m'],
+      [7, 'smpte240m'], [8, 'linear'], [9, 'log100'], [10, 'log316'],
+      [11, 'iec61966-2-4'], [12, 'bt1361e'], [13, 'iec61966-2-1'],
+      [14, 'bt2020-10'], [15, 'bt2020-12'], [16, 'smpte2084'],
+      [17, 'smpte428'], [18, 'arib-std-b67'],
+    ]).get(view.getUint16(6))
+    const matrix = new Map<number, NonNullable<ColorSpace['matrix']>>([
+      [0, 'rgb'], [1, 'bt709'], [4, 'fcc'], [5, 'bt470bg'],
+      [6, 'smpte170m'], [7, 'smpte240m'], [8, 'ycocg'], [9, 'bt2020nc'],
+      [10, 'bt2020c'], [11, 'smpte2085'], [12, 'chroma-derived-nc'],
+      [13, 'chroma-derived-c'], [14, 'ictcp'],
+    ]).get(view.getUint16(8))
+
+    if (!primaries && !transfer && !matrix) return undefined
+
+    return {
+      primaries,
+      transfer,
+      matrix,
+      range: (data[10] & 0x80) !== 0 ? 'full' : 'limited',
     }
   }
 
