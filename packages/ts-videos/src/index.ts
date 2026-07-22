@@ -203,3 +203,6 @@ export {
 
 // Batch processing
 export * from './batch'
+
+// Unified progressive and adaptive delivery pipeline
+export * from './delivery-pipeline'

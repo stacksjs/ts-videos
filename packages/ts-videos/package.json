@@ -126,6 +126,10 @@
       "types": "./dist/native-transcode.d.ts",
       "import": "./dist/native-transcode.js"
     },
+    "./delivery-pipeline": {
+      "types": "./dist/delivery-pipeline.d.ts",
+      "import": "./dist/delivery-pipeline.js"
+    },
     "./muxer": {
       "types": "./dist/muxer.d.ts",
       "import": "./dist/muxer.js"
