@@ -6,6 +6,7 @@ import type { Input } from './input'
 import type { Output } from './output'
 import type { ConversionOptions, EncodedPacket } from './types'
 import type { OutputVideoTrack, OutputAudioTrack } from './muxer'
+import { assertPacketCopyConversion } from './delivery'
 
 export interface ConversionConfig {
   input: Input
@@ -52,6 +53,7 @@ export class Conversion {
   private async setup(): Promise<void> {
     const videoTrack = await this.input.getPrimaryVideoTrack()
     const audioTrack = await this.input.getPrimaryAudioTrack()
+    assertPacketCopyConversion(videoTrack, audioTrack, this.options)
 
     if (videoTrack) {
       const outputVideoTrack = this.output.addVideoTrack({

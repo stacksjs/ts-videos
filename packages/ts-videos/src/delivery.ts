@@ -1,4 +1,4 @@
-import type { AudioCodec, ContainerFormat, VideoCodec } from './types'
+import type { AudioCodec, AudioTrack, ContainerFormat, ConversionOptions, VideoCodec, VideoTrack } from './types'
 
 export interface VideoSourceProfile {
   width: number
@@ -273,4 +273,30 @@ export function validateSegmentAlignment(
     }
   })
   return issues
+}
+
+/** Guard the packet-copy conversion path from silently relabeling unmodified encoded packets. */
+export function assertPacketCopyConversion(
+  videoTrack: VideoTrack | null,
+  audioTrack: AudioTrack | null,
+  options: ConversionOptions,
+): void {
+  const requested: string[] = []
+  if (videoTrack) {
+    if (options.videoCodec && options.videoCodec !== videoTrack.codec) requested.push(`video codec ${videoTrack.codec} to ${options.videoCodec}`)
+    if (options.width !== undefined && options.width !== videoTrack.width) requested.push(`width ${videoTrack.width} to ${options.width}`)
+    if (options.height !== undefined && options.height !== videoTrack.height) requested.push(`height ${videoTrack.height} to ${options.height}`)
+    if (options.frameRate !== undefined && options.frameRate !== videoTrack.frameRate) requested.push(`frame rate ${videoTrack.frameRate ?? 'unknown'} to ${options.frameRate}`)
+    if (options.videoBitrate !== undefined && options.videoBitrate !== videoTrack.bitrate) requested.push(`video bitrate ${videoTrack.bitrate ?? 'unknown'} to ${options.videoBitrate}`)
+    if (options.quality) requested.push(`video quality ${options.quality.name}`)
+  }
+  if (audioTrack) {
+    if (options.audioCodec && options.audioCodec !== audioTrack.codec) requested.push(`audio codec ${audioTrack.codec} to ${options.audioCodec}`)
+    if (options.sampleRate !== undefined && options.sampleRate !== audioTrack.sampleRate) requested.push(`sample rate ${audioTrack.sampleRate} to ${options.sampleRate}`)
+    if (options.channels !== undefined && options.channels !== audioTrack.channels) requested.push(`channels ${audioTrack.channels} to ${options.channels}`)
+    if (options.audioBitrate !== undefined && options.audioBitrate !== audioTrack.bitrate) requested.push(`audio bitrate ${audioTrack.bitrate ?? 'unknown'} to ${options.audioBitrate}`)
+  }
+  if (requested.length > 0) {
+    throw new Error(`Packet-copy conversion cannot perform ${requested.join(', ')}. Use a native encoder pipeline before muxing.`)
+  }
 }

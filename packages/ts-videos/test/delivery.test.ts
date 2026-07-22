@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  assertPacketCopyConversion,
   assertVideoPlanExecutable,
   buildVideoDeliveryPlan,
   deriveVideoLadder,
@@ -21,6 +22,18 @@ const source = {
 }
 
 describe('video delivery planning', () => {
+  test('refuses to relabel packet-copy output as transcoded media', () => {
+    expect(() => assertPacketCopyConversion({
+      id: 1,
+      index: 0,
+      type: 'video',
+      codec: 'h264',
+      width: 1920,
+      height: 1080,
+      frameRate: 30,
+    }, null, { videoCodec: 'vp9' })).toThrow(/native encoder pipeline/)
+  })
+
   test('derives a distinct ladder without upscaling', () => {
     const ladder = deriveVideoLadder(source)
     expect(ladder.map(rendition => rendition.height)).toEqual([240, 360, 480, 540, 720, 1080])
