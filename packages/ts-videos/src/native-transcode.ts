@@ -6,7 +6,7 @@ import type { Source } from './reader'
 import type { AudioCodec, AudioTrack, EncodedPacket, VideoCodec, VideoTrack } from './types'
 import { Conversion } from './conversion'
 import { assertVideoPlanExecutable } from './delivery'
-import { FormatRegistry } from './formats'
+import { FormatRegistry, registerFormat } from './formats'
 import { Input as MediaInput } from './input'
 import { Output as MediaOutput } from './output'
 import { createSource } from './source'
@@ -485,6 +485,25 @@ function defaultInput(source: string | Uint8Array | ArrayBuffer, formats?: Input
   })
 }
 
+async function ensureDefaultFormats(inputs: boolean, outputs: boolean): Promise<void> {
+  const [mp4, webm] = await Promise.all([
+    import('@ts-videos/mp4'),
+    import('@ts-videos/webm'),
+  ])
+  if (inputs) {
+    const names = new Set(FormatRegistry.getInputFormats().map(format => format.name))
+    for (const format of [new mp4.Mp4InputFormat(), new mp4.MovInputFormat(), new webm.WebmInputFormat(), new webm.MkvInputFormat()]) {
+      if (!names.has(format.name)) registerFormat(format)
+    }
+  }
+  if (outputs) {
+    const names = new Set(FormatRegistry.getOutputFormats().map(format => format.name))
+    for (const format of [new mp4.Mp4OutputFormat(), new webm.WebmOutputFormat()]) {
+      if (!names.has(format.name)) registerFormat(format)
+    }
+  }
+}
+
 function defaultOutput(planned: PlannedVideoOutput): Output {
   const format = FormatRegistry.getOutputFormatByExtension(planned.container)
   if (!format) throw new Error(`No ${planned.container} output format is registered`)
@@ -498,6 +517,9 @@ export async function generateVideoDerivatives(
   options: VideoDerivativeOptions = {},
 ): Promise<VideoDerivative[]> {
   assertVideoPlanExecutable(plan)
+  if (!options.inputFactory || !options.outputFactory) {
+    await ensureDefaultFormats(!options.inputFactory, !options.outputFactory)
+  }
   if (!options.inputFactory && typeof source === 'object' && !(source instanceof Uint8Array) && !(source instanceof ArrayBuffer)) {
     throw new TypeError('Video derivatives from a custom source require an inputFactory')
   }
