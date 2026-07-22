@@ -656,11 +656,31 @@ export class Mp4Muxer extends Muxer {
     else if (config.codec === 'h265') codecBox = 'hev1'
     else if (config.codec === 'vp9') codecBox = 'vp09'
     else if (config.codec === 'av1') codecBox = 'av01'
+    else if (config.codec === 'prores') {
+      const entries: Record<string, string> = {
+        'proxy': 'apco',
+        'lt': 'apcs',
+        '422': 'apcn',
+        'standard': 'apcn',
+        'hq': 'apch',
+        '4444': 'ap4h',
+        '4444-xq': 'ap4x',
+      }
+      codecBox = entries[config.profile ?? '422'] ?? 'apcn'
+    }
     else codecBox = 'mp4v'
 
     const codecConfig = config.codecDescription ?? new Uint8Array(0)
-    const configBoxType = config.codec === 'h264' ? 'avcC' : config.codec === 'h265' ? 'hvcC' : 'avcC'
-    const configBoxSize = codecConfig.byteLength > 0 ? 8 + codecConfig.byteLength : 0
+    const configBoxType = config.codec === 'h264'
+      ? 'avcC'
+      : config.codec === 'h265'
+        ? 'hvcC'
+        : config.codec === 'vp9'
+          ? 'vpcC'
+          : config.codec === 'av1'
+            ? 'av1C'
+            : undefined
+    const configBoxSize = configBoxType && codecConfig.byteLength > 0 ? 8 + codecConfig.byteLength : 0
 
     const size = 86 + configBoxSize
 
@@ -691,7 +711,7 @@ export class Mp4Muxer extends Muxer {
 
     if (configBoxSize > 0) {
       await writer.writeU32BE(configBoxSize)
-      await writer.writeFourCC(configBoxType)
+      await writer.writeFourCC(configBoxType!)
       await writer.writeBytes(codecConfig)
     }
 

@@ -302,6 +302,7 @@ export class Mp4Demuxer extends Demuxer {
         codec: this.getVideoCodec(entry.type),
         width: entry.width,
         height: entry.height,
+        profile: this.getVideoProfile(entry.type),
         frameRate: this.calculateFrameRate(trackInfo),
         isDefault: (tkhd.flags & 0x1) !== 0,
         language: mdhd.language,
@@ -508,8 +509,27 @@ export class Mp4Demuxer extends Demuxer {
         return 'av1'
       case 'mp4v':
         return 'mpeg4'
+      case 'apco':
+      case 'apcs':
+      case 'apcn':
+      case 'apch':
+      case 'ap4h':
+      case 'ap4x':
+        return 'prores'
       default:
         return 'unknown'
+    }
+  }
+
+  private getVideoProfile(type: string): string | undefined {
+    switch (type) {
+      case 'apco': return 'proxy'
+      case 'apcs': return 'lt'
+      case 'apcn': return '422'
+      case 'apch': return 'hq'
+      case 'ap4h': return '4444'
+      case 'ap4x': return '4444-xq'
+      default: return undefined
     }
   }
 
