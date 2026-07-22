@@ -1,0 +1,7 @@
+{
+  "duration": 2000,
+  "chapters": [
+    { "startTime": 0, "endTime": 1000, "title": "Opening" },
+    { "startTime": 1000, "endTime": 2000, "title": "Closing" }
+  ]
+}
