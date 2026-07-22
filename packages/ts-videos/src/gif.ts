@@ -4,7 +4,6 @@
  * Uses ts-gif for encoding with additional video-specific utilities
  */
 
-// @ts-expect-error - optional peer dependency
 import { Writer as GifWriter, Reader as GifReader } from 'ts-gif' // eslint-disable-line
 import { Buffer } from 'node:buffer'
 
