@@ -3,6 +3,7 @@ export { config } from './config'
 
 // Types
 export * from './types'
+export * from './delivery'
 
 // Utilities
 export * from './utils'
