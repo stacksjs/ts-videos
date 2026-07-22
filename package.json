@@ -45,6 +45,8 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bunx --bun bumpx prompt --recursive",
+    "release:patch": "bunx --bun bumpx patch --recursive --commit --tag --push --yes",
+    "release:minor": "bunx --bun bumpx minor --recursive --commit --tag --push --yes",
     "typecheck": "bunx tsc --noEmit",
     "dev:docs": "bun --bun bunpress dev docs",
     "build:docs": "bun --bun bunpress build docs",
