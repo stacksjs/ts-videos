@@ -1,7 +1,7 @@
 {
   "name": "@ts-videos/ts",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "MPEG Transport Stream codec package for ts-videos - zero dependency TypeScript implementation.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",

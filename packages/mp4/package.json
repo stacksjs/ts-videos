@@ -1,7 +1,7 @@
 {
   "name": "@ts-videos/mp4",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "MP4/MOV (ISOBMFF) codec support for ts-videos",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
