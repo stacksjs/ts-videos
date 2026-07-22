@@ -134,6 +134,10 @@
       "types": "./dist/presets.d.ts",
       "import": "./dist/presets.js"
     },
+    "./protected-delivery": {
+      "types": "./dist/protected-delivery.d.ts",
+      "import": "./dist/protected-delivery.js"
+    },
     "./quality-metrics": {
       "types": "./dist/quality-metrics.d.ts",
       "import": "./dist/quality-metrics.js"

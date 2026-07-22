@@ -4,6 +4,7 @@ export { config } from './config'
 // Types
 export * from './types'
 export * from './delivery'
+export * from './protected-delivery'
 
 // Utilities
 export * from './utils'

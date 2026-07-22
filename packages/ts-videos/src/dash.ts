@@ -228,6 +228,7 @@ export function generateMpd(
 
   const attrs: string[] = [
     'xmlns="urn:mpeg:dash:schema:mpd:2011"',
+    'xmlns:cenc="urn:mpeg:cenc:2013"',
     'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
     'xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd"',
     `profiles="${profiles}"`,
