@@ -651,6 +651,14 @@ export class FragmentedMp4Muxer extends Muxer {
     const data = this.trackData.get(trackId)
     if (!data) return
 
+    const hasVideoTrack = [...this.trackData.values()].some(item => item.track.type === 'video')
+    const hasQueuedSamples = [...this.trackData.values()].some(item => item.samples.length > 0)
+    const reachedBoundary = packet.timestamp - this.fragmentStartTime >= this.options.fragmentDuration
+    const beginsIndependentFragment = data.track.type === 'video' && packet.isKeyframe
+    if (hasQueuedSamples && reachedBoundary && (beginsIndependentFragment || !hasVideoTrack)) {
+      await this.flushFragment()
+    }
+
     const sample: FragmentSample = {
       data: packet.data,
       timestamp: packet.timestamp,
@@ -661,12 +669,6 @@ export class FragmentedMp4Muxer extends Muxer {
     }
 
     data.samples.push(sample)
-
-    // Check if we should write a fragment
-    const fragmentDuration = packet.timestamp - this.fragmentStartTime
-    if (fragmentDuration >= this.options.fragmentDuration) {
-      await this.flushFragment()
-    }
   }
 
   /**
@@ -692,14 +694,20 @@ export class FragmentedMp4Muxer extends Muxer {
 
     // Update fragment state
     this.sequenceNumber++
+    let fragmentEndTime = this.fragmentStartTime
     for (const data of this.trackData.values()) {
       if (data.samples.length > 0) {
-        const lastSample = data.samples[data.samples.length - 1]
-        data.baseMediaDecodeTime += BigInt(Math.round((lastSample.timestamp + lastSample.duration - this.fragmentStartTime) * data.timescale))
-        this.fragmentStartTime = lastSample.timestamp + lastSample.duration
+        data.baseMediaDecodeTime += data.samples.reduce(
+          (duration, sample) => duration + BigInt(Math.round(sample.duration * data.timescale)),
+          0n,
+        )
+        for (const sample of data.samples) {
+          fragmentEndTime = Math.max(fragmentEndTime, sample.timestamp + sample.duration)
+        }
       }
       data.samples = []
     }
+    this.fragmentStartTime = fragmentEndTime
   }
 
   private async buildMoof(): Promise<Uint8Array> {
