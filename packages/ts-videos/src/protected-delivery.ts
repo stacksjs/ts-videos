@@ -3,6 +3,7 @@ import type { HlsKey, HlsSegment, HlsVariantStream } from './hls'
 import type { VideoDeliveryPlan, VideoRendition } from './delivery'
 import { generateMpd } from './dash'
 import { generateMasterPlaylist, generateMediaPlaylist } from './hls'
+import { validateSegmentAlignment } from './delivery'
 
 export type VideoDrmSystem = 'clear-key' | 'fairplay' | 'playready' | 'widevine'
 
@@ -152,6 +153,21 @@ export async function createAdaptiveDeliveryBundle(
   const dashEnabled = options.dash ?? plan.streaming.includes('dash')
   if (!hlsEnabled && !dashEnabled) throw new TypeError('Adaptive delivery requires HLS or DASH output')
   if (inputs.length !== plan.renditions.length) throw new TypeError('Adaptive inputs must match the planned rendition count')
+  const timelines = inputs.map((input) => {
+    let cursor = 0
+    return input.segments.map((segment, index) => {
+      if (!Number.isFinite(segment.duration) || segment.duration <= 0) throw new TypeError(`Segment ${index} duration must be positive`)
+      const startTime = segment.startTime ?? cursor
+      if (!Number.isFinite(startTime) || startTime < 0) throw new TypeError(`Segment ${index} start time must be non-negative`)
+      cursor = startTime + segment.duration
+      return { startTime, duration: segment.duration }
+    })
+  })
+  const alignmentIssues = validateSegmentAlignment(timelines)
+  if (alignmentIssues.length > 0) {
+    const issue = alignmentIssues[0]
+    throw new TypeError(`Rendition ${issue.rendition} segment ${issue.segment} starts at ${issue.actual}, expected ${issue.expected}`)
+  }
   const files: Record<string, string | Uint8Array> = {}
   const variants: HlsVariantStream[] = []
   const representations: DashRepresentation[] = []

@@ -52,6 +52,17 @@ describe('protected adaptive delivery', () => {
     await expect(createAdaptiveDeliveryBundle(plan, [], {})).rejects.toThrow('planned rendition count')
   })
 
+  it('rejects misaligned rendition boundaries', async () => {
+    const first = { name: '360p', width: 640, height: 360, frameRate: 30, videoBitrate: 700_000, audioBitrate: 96_000 }
+    const second = { name: '720p', width: 1280, height: 720, frameRate: 30, videoBitrate: 2_000_000, audioBitrate: 128_000 }
+    const plan = buildVideoDeliveryPlan(source, { renditions: [first, second] })
+    const data = new Uint8Array([1])
+    await expect(createAdaptiveDeliveryBundle(plan, [
+      { rendition: first, segments: [{ uri: 'one.m4s', duration: 4, startTime: 0, data }, { uri: 'two.m4s', duration: 4, startTime: 4, data }] },
+      { rendition: second, segments: [{ uri: 'one.m4s', duration: 4, startTime: 0, data }, { uri: 'two.m4s', duration: 4, startTime: 4.2, data }] },
+    ])).rejects.toThrow('starts at 4.2, expected 4')
+  })
+
   it('refuses to label clear segments as proprietary DRM content', async () => {
     const rendition = { name: '720p', width: 1280, height: 720, frameRate: 30, videoBitrate: 2_000_000, audioBitrate: 128_000 }
     const plan = buildVideoDeliveryPlan(source, { renditions: [rendition] })
