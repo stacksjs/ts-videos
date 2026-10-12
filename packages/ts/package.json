@@ -41,6 +41,6 @@
   },
   "devDependencies": {
     "ts-videos": "workspace:*",
-    "bun-plugin-dtsx": "^0.11.13"
+    "bun-plugin-dtsx": "^0.11.19"
   }
 }
