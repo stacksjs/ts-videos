@@ -57,6 +57,12 @@ jobs:
       - name: Install Dependencies
         run: bun install
 
+      # The packages import one another by name (`@ts-videos/mp4`), which
+      # resolves to each one's dist/, so they are built before anything reads
+      # them. Without this every run failed to find them (since 2026-11-14).
+      - name: Build packages
+        run: bun run build:packages
+
       - name: Typecheck
         run: bun --bun run typecheck
 
@@ -79,6 +85,12 @@ jobs:
 
       - name: Install Dependencies
         run: bun install
+
+      # The packages import one another by name (`@ts-videos/mp4`), which
+      # resolves to each one's dist/, so they are built before anything reads
+      # them. Without this every run failed to find them (since 2026-11-14).
+      - name: Build packages
+        run: bun run build:packages
 
       - name: Unit Test
         run: bun test
