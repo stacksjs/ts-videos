@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { CLI } from '@stacksjs/clapp'
 import { version } from '../../../package.json'
+import type { InputFormat } from '../src'
 import { Input, Output, Conversion, createSource, BufferTarget, formatDuration } from '../src'
 
 const cli = new CLI('ts-videos')
@@ -14,7 +15,7 @@ cli
   .action(async (input: string, options: { json?: boolean, verbose?: boolean }) => {
     try {
       const source = createSource(input)
-      const inputFile = new Input({ source })
+      const inputFile = new Input({ source, formats: await loadInputFormats() })
 
       const [tracks, metadata, duration, format] = await Promise.all([
         inputFile.getTracks(),
@@ -87,7 +88,7 @@ cli
       console.log(`Converting ${input} to ${output}...`)
 
       const inputSource = createSource(input)
-      const inputFile = new Input({ source: inputSource })
+      const inputFile = new Input({ source: inputSource, formats: await loadInputFormats() })
 
       const outputExt = output.split('.').pop()?.toLowerCase() ?? 'mp4'
 
@@ -198,7 +199,7 @@ cli
   .action(async (input: string, options: { video?: string, audio?: string, track?: string, output?: string }) => {
     try {
       const source = createSource(input)
-      const inputFile = new Input({ source })
+      const inputFile = new Input({ source, formats: await loadInputFormats() })
 
       const tracks = await inputFile.getTracks()
 
@@ -290,6 +291,41 @@ cli.command('version', 'Show the version').action(() => {
 cli.version(version)
 cli.help()
 cli.parse()
+
+/**
+ * The container readers live in their own packages, so an Input knows no
+ * formats until it is given some. Load whichever of them are installed.
+ * MP4 goes before MOV: both read ISO BMFF, and MOV is the fallback.
+ */
+async function loadInputFormats(): Promise<InputFormat[]> {
+  const formats: InputFormat[] = []
+
+  try {
+    // @ts-ignore - optional peer dependency (may or may not be installed depending on workspace state)
+    const { Mp4InputFormat, MovInputFormat } = await import('@ts-videos/mp4')
+    formats.push(new Mp4InputFormat(), new MovInputFormat())
+  }
+  catch {}
+
+  try {
+    // @ts-ignore - optional peer dependency (may or may not be installed depending on workspace state)
+    const { WebmInputFormat, MkvInputFormat } = await import('@ts-videos/webm')
+    formats.push(new WebmInputFormat(), new MkvInputFormat())
+  }
+  catch {}
+
+  try {
+    // @ts-ignore - optional peer dependency (may or may not be installed depending on workspace state)
+    const { TsInputFormat } = await import('@ts-videos/ts')
+    formats.push(new TsInputFormat())
+  }
+  catch {}
+
+  if (formats.length === 0)
+    throw new Error('No input formats are installed. Install @ts-videos/mp4 or @ts-videos/webm.')
+
+  return formats
+}
 
 function parseTime(time: string): number {
   if (time.includes(':')) {
