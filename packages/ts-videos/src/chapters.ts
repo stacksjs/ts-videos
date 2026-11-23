@@ -329,34 +329,23 @@ export function parseMp4Chapters(data: Uint8Array): ChapterList {
 function parseMp4ChplBox(data: Uint8Array, chapters: Chapter[]): void {
   if (data.length < 5) return
 
-  // Skip version and flags
-  let offset = 4
-  // Skip reserved
-  offset += 1
-  const count = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-  offset += 4
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+  const decoder = new TextDecoder()
+  let offset = data[0] === 0 ? 4 : 8
+  if (offset >= data.length) return
+  // Older ts-videos files wrote the entry count as a four-byte integer.
+  if (offset === 8 && data[offset] === 0 && data.length >= 12)
+    offset += 3
+  const count = data[offset++]
 
-  for (let i = 0; i < count && offset < data.length; i++) {
-    // Time is in 100ns units
-    const timeHigh = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    offset += 4
-    const timeLow = (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3]
-    offset += 4
-
-    const time100ns = (timeHigh * 0x100000000) + timeLow
-    const startTime = Math.floor(time100ns / 10000) // Convert to ms
-
-    const titleLength = data[offset]
-    offset += 1
-
-    const titleBytes = data.slice(offset, offset + titleLength)
-    const title = new TextDecoder('utf-8').decode(titleBytes)
+  for (let i = 0; i < count && offset + 9 <= data.length; i++) {
+    const startTime = Number(view.getBigUint64(offset) / 10000n)
+    const titleLength = data[offset + 8]
+    offset += 9
+    if (offset + titleLength > data.length) break
+    const title = decoder.decode(data.subarray(offset, offset + titleLength))
     offset += titleLength
-
-    chapters.push({
-      startTime,
-      title,
-    })
+    chapters.push({ startTime, title })
   }
 
   // Set end times
@@ -367,69 +356,29 @@ function parseMp4ChplBox(data: Uint8Array, chapters: Chapter[]): void {
 
 /** Create MP4 chapter atom (chpl box) */
 export function createMp4ChapterAtom(chapters: Chapter[]): Uint8Array {
-  const entries: Uint8Array[] = []
+  const encoder = new TextEncoder()
+  const titleBuffer = new Uint8Array(255)
+  const entries = chapters.slice(0, 255).map(chapter => {
+    const { written } = encoder.encodeInto(chapter.title, titleBuffer)
+    const entry = new Uint8Array(9 + written)
+    new DataView(entry.buffer).setBigUint64(0, BigInt(Math.round(chapter.startTime)) * 10000n)
+    entry[8] = written
+    entry.set(titleBuffer.subarray(0, written), 9)
+    return entry
+  })
 
-  for (const chapter of chapters) {
-    // Convert ms to 100ns units
-    const time100ns = BigInt(chapter.startTime) * 10000n
+  // A version 1 chpl box has four reserved bytes and a one-byte chapter count.
+  const headerSize = 17
+  const chpl = new Uint8Array(entries.reduce((size, entry) => size + entry.length, headerSize))
+  new DataView(chpl.buffer).setUint32(0, chpl.length)
+  chpl.set([0x63, 0x68, 0x70, 0x6c, 1], 4) // chpl, version 1
+  chpl[16] = entries.length
 
-    const titleBytes = new TextEncoder().encode(chapter.title)
-    const entry = new Uint8Array(8 + 1 + titleBytes.length)
-
-    // Write time (64-bit, big-endian)
-    const view = new DataView(entry.buffer)
-    view.setBigUint64(0, time100ns, false)
-
-    // Write title length and title
-    entry[8] = titleBytes.length
-    entry.set(titleBytes, 9)
-
-    entries.push(entry)
-  }
-
-  // Calculate total size
-  let entriesSize = 0
-  for (const entry of entries) {
-    entriesSize += entry.length
-  }
-
-  // Create chpl box
-  // Size (4) + Type (4) + Version (1) + Flags (3) + Reserved (1) + Count (4) + Entries
-  const chplSize = 4 + 4 + 1 + 3 + 1 + 4 + entriesSize
-  const chpl = new Uint8Array(chplSize)
-  const view = new DataView(chpl.buffer)
-
-  let offset = 0
-
-  // Box size
-  view.setUint32(offset, chplSize, false)
-  offset += 4
-
-  // Box type 'chpl'
-  chpl[offset++] = 0x63 // c
-  chpl[offset++] = 0x68 // h
-  chpl[offset++] = 0x70 // p
-  chpl[offset++] = 0x6c // l
-
-  // Version (1)
-  chpl[offset++] = 1
-
-  // Flags (3)
-  offset += 3
-
-  // Reserved (1)
-  offset += 1
-
-  // Chapter count
-  view.setUint32(offset, chapters.length, false)
-  offset += 4
-
-  // Write entries
+  let offset = headerSize
   for (const entry of entries) {
     chpl.set(entry, offset)
     offset += entry.length
   }
-
   return chpl
 }
 

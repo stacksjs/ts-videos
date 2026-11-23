@@ -2,6 +2,7 @@
  * MP4/MOV muxer implementation
  */
 
+import { createMp4ChapterAtom } from 'ts-videos/chapters'
 import type { Target } from 'ts-videos/writer'
 import type { VideoTrackConfig, AudioTrackConfig, SubtitleTrackConfig, EncodedPacket } from 'ts-videos/types'
 import { Muxer } from 'ts-videos/muxer'
@@ -242,9 +243,9 @@ export class Mp4Muxer extends Muxer {
     const chapterTrackId = hasChapters ? this.tracks.length + 1 : 0
     const chapterSamples = hasChapters ? this.buildChapterTextSamples() : []
 
-    // Build user tracks (with tref on audio tracks if chapters exist)
+    // Reference the chapter track from each audio or video track.
     for (const data of this.trackData.values()) {
-      const trefTarget = data.track.type === 'audio' && hasChapters ? chapterTrackId : undefined
+      const trefTarget = data.track.type !== 'subtitle' && hasChapters ? chapterTrackId : undefined
       const trak = await this.buildTrak(data, mdatOffset, trefTarget)
       traks.push(trak)
     }
@@ -1246,7 +1247,7 @@ export class Mp4Muxer extends Muxer {
 
     // Nero chapters (chpl) — placed before meta in udta
     if (hasChapters) {
-      children.push(await this.buildChpl())
+      children.push(createMp4ChapterAtom(this.chapters.map(chapter => ({ title: chapter.title, startTime: chapter.startTimeMs }))))
     }
 
     // meta box containing ilst
@@ -1333,42 +1334,6 @@ export class Mp4Muxer extends Muxer {
     return writer.getBuffer()
   }
 
-  private async buildChpl(): Promise<Uint8Array> {
-    const writer = new Writer()
-    const encoder = new TextEncoder()
-
-    // Build chapter entries
-    const entries: Uint8Array[] = []
-    for (const ch of this.chapters) {
-      const titleBytes = encoder.encode(ch.title)
-      const titleLen = Math.min(titleBytes.length, 255)
-      // timestamp in 10MHz units (100ns per tick)
-      const timestamp = BigInt(Math.round(ch.startTimeMs * 10000))
-      const entryBuf = new Uint8Array(8 + 1 + titleLen)
-      const view = new DataView(entryBuf.buffer)
-      view.setBigUint64(0, timestamp)
-      entryBuf[8] = titleLen
-      entryBuf.set(titleBytes.subarray(0, titleLen), 9)
-      entries.push(entryBuf)
-    }
-
-    const entriesSize = entries.reduce((sum, e) => sum + e.byteLength, 0)
-    // chpl: version(1) + flags(3) + reserved(4) + count(4) + entries
-    const contentSize = 12 + entriesSize
-    await writer.writeU32BE(contentSize + 8)
-    await writer.writeFourCC('chpl')
-    await writer.writeU8(1) // version
-    await writer.writeU8(0) // flags
-    await writer.writeU8(0)
-    await writer.writeU8(0)
-    await writer.writeU32BE(0) // reserved
-    await writer.writeU32BE(this.chapters.length) // chapter count
-    for (const entry of entries) {
-      await writer.writeBytes(entry)
-    }
-
-    return writer.getBuffer()
-  }
 }
 
 // ── ilst atom helpers (module-level) ──

@@ -3,10 +3,10 @@ import { Mp4Muxer } from '../../mp4/src/muxer'
 import { createMp4ChapterAtom, parseMp4Chapters } from '../src/chapters'
 import { BufferTarget } from '../src/target'
 
-async function muxWithChapters(chapters: { title: string, startTimeMs: number }[]): Promise<Uint8Array> {
+async function muxWithChapters(chapters: { title: string, startTimeMs: number }[], video = false): Promise<Uint8Array> {
   const target = new BufferTarget()
   const muxer = new Mp4Muxer(target)
-  const track = muxer.addAudioTrack({
+  const track = video ? muxer.addVideoTrack({ codec: 'h264', width: 320, height: 180 }) : muxer.addAudioTrack({
     codec: 'aac',
     sampleRate: 44100,
     channels: 2,
@@ -30,6 +30,12 @@ async function muxWithChapters(chapters: { title: string, startTimeMs: number }[
 }
 
 describe('parseMp4Chapters', () => {
+  it('links chapters from the video track even for a silent clip', async () => {
+    const film = await muxWithChapters([{ title: 'Intro', startTimeMs: 0 }, { title: 'Review', startTimeMs: 1500 }], true)
+    expect(Buffer.from(film).includes(Buffer.from([0, 0, 0, 20, 116, 114, 101, 102, 0, 0, 0, 12, 99, 104, 97, 112, 0, 0, 0, 2]))).toBe(true)
+    expect(parseMp4Chapters(film).chapters.map(chapter => chapter.title)).toEqual(['Intro', 'Review'])
+  })
+
   it('round-trips a QuickTime chapter text track written by Mp4Muxer', async () => {
     const buffer = await muxWithChapters([
       { title: 'Intro', startTimeMs: 0 },
@@ -84,8 +90,9 @@ describe('parseMp4Chapters', () => {
   it('parses Nero chpl chapters when no chapter track exists', () => {
     const chpl = createMp4ChapterAtom([
       { startTime: 0, title: 'Part One' },
-      { startTime: 60000, title: 'Part Two' },
+      { startTime: 300000, title: 'Part Two' },
     ])
+    expect(chpl[16]).toBe(2)
 
     const box = (type: string, payload: Uint8Array): Uint8Array => {
       const out = new Uint8Array(8 + payload.length)
@@ -102,7 +109,7 @@ describe('parseMp4Chapters', () => {
     expect(chapters[0].title).toBe('Part One')
     expect(chapters[0].startTime).toBe(0)
     expect(chapters[1].title).toBe('Part Two')
-    expect(chapters[1].startTime).toBe(60000)
+    expect(chapters[1].startTime).toBe(300000)
   })
 
   it('returns no chapters for data without a moov box', () => {
