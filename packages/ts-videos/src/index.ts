@@ -163,7 +163,7 @@ export {
   type BatchSplitPlan,
   calculateSplitPoints, formatSegmentFilename,
   alignToKeyframes, mergeShortSegments,
-  createConcatPlan, generateConcatList,
+  createConcatPlan,
   calculateOutputDimensions, calculateTrimWithFade,
   extractSubclip, parseTimestamp,
   formatTimestamp as formatConcatTimestamp,
@@ -198,7 +198,7 @@ export {
   applyGamutMapping,
   HdrToSdrConverter,
   detectHdrFormat as detectHdrSdrFormat,
-  getHdrToSdrFilter, getConversionDescription,
+  getConversionDescription,
 } from './hdr-sdr'
 
 // Batch processing

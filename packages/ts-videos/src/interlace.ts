@@ -436,38 +436,6 @@ export async function detectInterlace(
 }
 
 /**
- * Generate FFmpeg filter string for deinterlacing
- */
-export function getDeinterlaceFilter(
-  method: DeinterlaceMethod,
-  fieldOrder: FieldOrder = 'tff'
-): string {
-  const parity = fieldOrder === 'bff' ? 1 : 0 // 0 = tff, 1 = bff
-
-  switch (method) {
-    case 'yadif':
-      return `yadif=mode=0:parity=${parity}:deint=0`
-    case 'yadif_2x':
-      return `yadif=mode=1:parity=${parity}:deint=0`
-    case 'bwdif':
-      return `bwdif=mode=0:parity=${parity}:deint=0`
-    case 'w3fdif':
-      return `w3fdif=filter=complex:deint=0`
-    case 'kerndeint':
-      return `kerndeint=thresh=10:map=0:order=${parity}:sharp=0:twoway=0`
-    case 'bob':
-      return `tinterlace=mode=6`
-    case 'blend':
-      return `tinterlace=mode=0`
-    case 'ivtc':
-      return `pullup,fps=24000/1001`
-    case 'none':
-    default:
-      return ''
-  }
-}
-
-/**
  * Get deinterlace filter options description
  */
 export function getDeinterlaceDescription(method: DeinterlaceMethod): string {
@@ -509,7 +477,6 @@ const _default: {
   analyzeFieldOrder: typeof analyzeFieldOrder
   detectTelecinePattern: typeof detectTelecinePattern
   recommendDeinterlacer: typeof recommendDeinterlacer
-  getDeinterlaceFilter: typeof getDeinterlaceFilter
   getDeinterlaceDescription: typeof getDeinterlaceDescription
 } = {
   InterlaceDetector,
@@ -518,7 +485,6 @@ const _default: {
   analyzeFieldOrder,
   detectTelecinePattern,
   recommendDeinterlacer,
-  getDeinterlaceFilter,
   getDeinterlaceDescription,
 }
 export default _default

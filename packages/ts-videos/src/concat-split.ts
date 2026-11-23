@@ -331,25 +331,6 @@ export function createConcatPlan(
   }
 }
 
-/** Generate concat list for file-based concatenation */
-export function generateConcatList(
-  filePaths: string[],
-  format: 'ffmpeg' | 'simple' = 'ffmpeg',
-): string {
-  if (format === 'ffmpeg') {
-    // FFmpeg concat demuxer format
-    const lines = filePaths.map((path) => {
-      const escaped = path.replace(/'/g, '\'\\\'\'')
-      return `file '${escaped}'`
-    })
-    return lines.join('\n')
-  }
-  else {
-    // Simple list
-    return filePaths.join('\n')
-  }
-}
-
 /** Calculate output dimensions for concatenation */
 export function calculateOutputDimensions(
   inputDimensions: Array<{ width: number; height: number }>,

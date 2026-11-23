@@ -726,44 +726,6 @@ export function detectHdrFormat(
 }
 
 /**
- * Generate FFmpeg filter string for HDR to SDR conversion
- */
-export function getHdrToSdrFilter(
-  _metadata: HdrMetadata,
-  options: ToneMappingOptions = {}
-): string {
-  const filters: string[] = []
-
-  const algorithm = options.algorithm ?? 'bt2390'
-  const desat = options.desat ?? 0.5
-
-  // Map algorithm to FFmpeg zscale tonemap
-  const tonemapMap: Record<ToneMappingAlgorithm, string> = {
-    reinhard: 'reinhard',
-    reinhard_extended: 'reinhard',
-    hable: 'hable',
-    aces: 'mobius', // FFmpeg doesn't have ACES, use mobius
-    aces_fitted: 'mobius',
-    bt2390: 'bt2390',
-    mobius: 'mobius',
-    linear: 'linear',
-    clip: 'clip',
-  }
-
-  // Use zscale for proper HDR conversion
-  filters.push(
-    `zscale=t=linear:npl=${options.sourcePeakNits ?? 1000}`,
-    `format=gbrpf32le`,
-    `zscale=p=bt709`,
-    `tonemap=${tonemapMap[algorithm]}:desat=${desat}:peak=${(options.targetPeakNits ?? 100) / (options.sourcePeakNits ?? 1000)}`,
-    `zscale=t=bt709:m=bt709:r=tv`,
-    `format=yuv420p`
-  )
-
-  return filters.join(',')
-}
-
-/**
  * Get conversion description for display
  */
 export function getConversionDescription(metadata: HdrMetadata, options: ConversionOptions = {}): string {
@@ -810,7 +772,6 @@ const _default: {
   xyzToBt2020: typeof xyzToBt2020
   applyGamutMapping: typeof applyGamutMapping
   detectHdrFormat: typeof detectHdrFormat
-  getHdrToSdrFilter: typeof getHdrToSdrFilter
   getConversionDescription: typeof getConversionDescription
 } = {
   HdrToSdrConverter,
@@ -838,7 +799,6 @@ const _default: {
   xyzToBt2020,
   applyGamutMapping,
   detectHdrFormat,
-  getHdrToSdrFilter,
   getConversionDescription,
 }
 export default _default

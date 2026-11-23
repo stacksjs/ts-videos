@@ -70,7 +70,7 @@ describe('video format fixtures', () => {
   })
 
   test('reads a portrait iPhone-style HLG clip as portrait, HLG and 60 fps', async () => {
-    // hlg-portrait.mov (make-hlg-portrait.sh): 3840x2160 HEVC Main10 HLG at
+    // hlg-portrait.mov: 3840x2160 HEVC Main10 HLG at
     // 60 fps, stored landscape with a -90 degree display matrix, in a
     // QuickTime file whose colr box is 'nclc'. Each of these was misread:
     // the matrix's -1 (0xFFFF0000) as 65535 so rotation fell through to 0,
