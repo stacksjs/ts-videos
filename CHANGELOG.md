@@ -1,5 +1,31 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.4...v0.2.0)
+
+## 💥 Breaking Changes
+
+- refactor!: remove ffmpeg-only helpers and fixture script ([6fb6de6](https://github.com/stacksjs/ts-videos/commit/6fb6de6)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🐛 Bug Fixes
+
+- **mp4**: read rotation, QuickTime colour and frame rate from MOV/MP4 ([da6c0b1](https://github.com/stacksjs/ts-videos/commit/da6c0b1)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧪 Tests
+
+- **mp4**: an iPhone-style HLG portrait clip reads as portrait, HLG, 60 fps ([feee0ad](https://github.com/stacksjs/ts-videos/commit/feee0ad)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🤖 Continuous Integration
+
+- build the workspace packages before typecheck and tests ([30e059b](https://github.com/stacksjs/ts-videos/commit/30e059b)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.0 ([fc21b5a](https://github.com/stacksjs/ts-videos/commit/fc21b5a)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.3...v0.1.4)
 
 ## 🤖 Continuous Integration
