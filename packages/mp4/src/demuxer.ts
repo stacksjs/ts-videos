@@ -303,7 +303,7 @@ export class Mp4Demuxer extends Demuxer {
         width: entry.width,
         height: entry.height,
         profile: this.getVideoProfile(entry.type),
-        frameRate: this.calculateFrameRate(trackInfo),
+        frameRate: await this.calculateFrameRate(stblChildren, mdhd.timescale),
         isDefault: (tkhd.flags & 0x1) !== 0,
         language: mdhd.language,
         codecDescription: this.extractCodecDescription(entry),
@@ -353,7 +353,10 @@ export class Mp4Demuxer extends Demuxer {
       await this.reader.skip(4 + 4)
     }
 
-    await this.reader.skip(8)
+    // reserved[2], then layer, alternate_group, volume and reserved (2 bytes
+    // each): 16 bytes before the matrix. Skipping 8 read the matrix from the
+    // middle of them, so every rotation came back 0 (#1006).
+    await this.reader.skip(16)
     const matrix: number[] = []
     for (let i = 0; i < 9; i++) {
       matrix.push((await this.reader.readI32BE()) ?? 0)
@@ -535,10 +538,14 @@ export class Mp4Demuxer extends Demuxer {
 
   private extractColorSpace(entry: VideoSampleEntry): ColorSpace | undefined {
     const data = entry.extensions.find(extension => extension.type === 'colr')?.data
-    if (!data || data.length < 11) return undefined
+    if (!data || data.length < 10) return undefined
 
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
-    if (readFourCC(view, 0) !== 'nclx') return undefined
+    // 'nclx' (ISO BMFF) and 'nclc' (QuickTime, so every iPhone clip) carry the
+    // same three code points; only 'nclx' adds the full-range flag (#1007).
+    const kind = readFourCC(view, 0)
+    if (kind !== 'nclx' && kind !== 'nclc') return undefined
+    if (kind === 'nclx' && data.length < 11) return undefined
     const primaries = new Map<number, NonNullable<ColorSpace['primaries']>>([
       [1, 'bt709'], [4, 'bt470m'], [5, 'bt470bg'], [6, 'smpte170m'],
       [7, 'smpte240m'], [8, 'film'], [9, 'bt2020'], [10, 'smpte428'],
@@ -564,7 +571,7 @@ export class Mp4Demuxer extends Demuxer {
       primaries,
       transfer,
       matrix,
-      range: (data[10] & 0x80) !== 0 ? 'full' : 'limited',
+      range: kind === 'nclx' ? ((data[10]! & 0x80) !== 0 ? 'full' : 'limited') : undefined,
     }
   }
 
@@ -613,8 +620,22 @@ export class Mp4Demuxer extends Demuxer {
     return 0
   }
 
-  private calculateFrameRate(_trackInfo: TrackInfo): number | undefined {
-    return undefined
+  /**
+   * Average frames per second: the samples in `stts` over the time they span.
+   * This was a stub returning undefined, so no MP4 or MOV track had a frame
+   * rate (#1008).
+   */
+  private async calculateFrameRate(stblChildren: Box[], timescale: number): Promise<number | undefined> {
+    const sttsBox = stblChildren.find(box => box.type === 'stts')
+    if (!sttsBox || !timescale) return undefined
+    let samples = 0
+    let ticks = 0
+    for (const { sampleCount, sampleDelta } of await this.parseStts(sttsBox)) {
+      samples += sampleCount
+      ticks += sampleCount * sampleDelta
+    }
+    if (samples === 0 || ticks === 0) return undefined
+    return Math.round((samples * timescale / ticks) * 1000) / 1000
   }
 
   private async parseMetadata(_boxes: Box[]): Promise<Metadata> {
