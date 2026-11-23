@@ -82,6 +82,8 @@ describe('video format fixtures', () => {
     expect(result.video[0]).toMatchObject({ codec: 'h265', width: 3840, height: 2160, rotation: 90 })
     expect(result.video[0]?.colorSpace).toMatchObject({ primaries: 'bt2020', transfer: 'arib-std-b67', matrix: 'bt2020nc' })
     expect(result.video[0]?.frameRate).toBeCloseTo(60, 1)
+    // 48 kHz is above 2^15 Hz, so the 16.16 rate must be shifted unsigned.
+    expect(result.audio[0]).toMatchObject({ codec: 'aac', sampleRate: 48000, channels: 1 })
   })
 
   test('computes the frame rate of every fixture', async () => {

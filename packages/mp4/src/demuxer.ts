@@ -454,7 +454,7 @@ export class Mp4Demuxer extends Demuxer {
         const channelCount = (await this.reader.readU16BE()) ?? 2
         const sampleSize = (await this.reader.readU16BE()) ?? 16
         await this.reader.skip(4)
-        const sampleRate = ((await this.reader.readU32BE()) ?? 44100 << 16) >> 16
+        const sampleRate = ((await this.reader.readU32BE()) ?? 44100 << 16) >>> 16
 
         const extensions = await this.parseExtensions(startPos + entrySize - 8)
 
