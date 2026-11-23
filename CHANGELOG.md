@@ -1,5 +1,22 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.2...v0.1.3)
+
+## 🐛 Bug Fixes
+
+- **mp4**: make chapters readable in silent videos ([19ed1ea](https://github.com/stacksjs/ts-videos/commit/19ed1ea)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.3 ([be25d06](https://github.com/stacksjs/ts-videos/commit/be25d06)) _(by Chris <chrisbreuer93@gmail.com>)_
+- run @stacksjs/logsmith, not the unrelated npm 'logsmith' ([73f1a18](https://github.com/stacksjs/ts-videos/commit/73f1a18)) _(by Chris <chrisbreuer93@gmail.com>)_
+- release through @stacksjs/bumpx, not the unrelated npm 'bumpx' ([d987d46](https://github.com/stacksjs/ts-videos/commit/d987d46)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.1...v0.1.2)
 
 ## 🐛 Bug Fixes
