@@ -1,5 +1,20 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.3...v0.1.4)
+
+## 🤖 Continuous Integration
+
+- allow trusted publishing for video releases ([7b16399](https://github.com/stacksjs/ts-videos/commit/7b16399)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.4 ([505415e](https://github.com/stacksjs/ts-videos/commit/505415e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.2...v0.1.3)
 
 ## 🐛 Bug Fixes
