@@ -5,16 +5,17 @@
  * `decodeAudioToWav` also resamples, mixes down and writes a 16-bit WAV, the
  * shape a speech-to-text service takes (16 kHz mono by default).
  *
- * WAV is read here directly. Every other container goes through the input
- * formats (MP4, MOV and M4A from @ts-videos/mp4, WebM and MKV from
- * @ts-videos/webm), and every compressed codec through a decoder registered
- * with `registerAudioDecoder`. PCM needs no decoder.
+ * WAV and Ogg Opus are read here directly. Every other container goes
+ * through the input formats (MP4, MOV and M4A from @ts-videos/mp4, WebM and
+ * MKV from @ts-videos/webm). AAC and Opus are decoded here, in TypeScript;
+ * other codecs plug in with `registerAudioDecoder`. PCM needs no decoder.
  */
 
 import type { InputFormat } from './demuxer'
 import type { Source } from './reader'
 import type { AudioCodec, AudioTrack, EncodedPacket } from './types'
 import { createAacDecoder } from './aac-decoder'
+import { createOpusDecoder, decodeOggOpus, isOgg } from './opus/opus-audio'
 import { Input } from './input'
 import { createSource } from './source'
 
@@ -68,6 +69,7 @@ const decoders = new Map<string, AudioDecoderFactory>()
 /** The decoders that come with ts-videos; a registered decoder for the same codec takes precedence. */
 const builtInDecoders: Partial<Record<AudioCodec, AudioDecoderFactory>> = {
   aac: createAacDecoder,
+  opus: createOpusDecoder,
 }
 
 /**
@@ -141,6 +143,14 @@ export async function decodeAudio(input: AudioInput, options: DecodeAudioOptions
     const size = bytes instanceof Uint8Array ? bytes.length : typeof Blob !== 'undefined' && bytes instanceof Blob ? bytes.size : null
     if (size !== null && (size === 0 || size > options.maxBytes))
       throw new Error('Audio size exceeds the upload limit or is empty')
+  }
+
+  if (bytes instanceof Uint8Array && isOgg(bytes)) {
+    const decoded = decodeOggOpus(bytes, options.signal)
+    const duration = (decoded.channels[0]?.length ?? 0) / decoded.sampleRate
+    if (options.maxDurationSeconds !== undefined && duration > options.maxDurationSeconds)
+      throw new AudioTooLongError(options.maxDurationSeconds)
+    return { ...decoded, duration, codec: 'opus' }
   }
 
   if (bytes instanceof Uint8Array && isWav(bytes)) {
