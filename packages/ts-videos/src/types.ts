@@ -101,6 +101,14 @@ export interface AudioTrack extends BaseTrack {
   bitrate?: number
   bitsPerSample?: number
   channelLayout?: string
+  /**
+   * Seconds at the start of the decoded sound that are not meant to be heard:
+   * the encoder's priming (2112 samples for Apple's AAC), from the container's
+   * edit list.
+   */
+  trimStart?: number
+  /** Seconds to keep after `trimStart`, when the container says how long the sound is meant to be. */
+  trimmedDuration?: number
 }
 
 export interface SubtitleTrack extends BaseTrack {

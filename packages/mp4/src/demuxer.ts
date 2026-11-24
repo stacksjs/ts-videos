@@ -40,6 +40,8 @@ interface SampleInfo {
 
 export class Mp4Demuxer extends Demuxer {
   private movieTimescale = 1000
+  /** Apple's iTunSMPB, in the audio's own samples: priming at the start, and the samples that are real sound. */
+  private gapless: { priming: number, samples: number } | null = null
   private movieDuration = 0n
   private trackInfos: TrackInfo[] = []
   private moovBox: Box | null = null
@@ -220,6 +222,8 @@ export class Mp4Demuxer extends Demuxer {
       await this.parseMvhd(mvhdBox)
     }
 
+    this.gapless = await this.parseGaplessInfo(moovChildren)
+
     const trakBoxes = moovChildren.filter(b => b.type === 'trak')
     this._tracks = []
 
@@ -316,6 +320,14 @@ export class Mp4Demuxer extends Demuxer {
 
     if (isAudioHandler(hdlr.handlerType) && stsd.entries.length > 0) {
       const entry = stsd.entries[0] as AudioSampleEntry
+      // An edit list says where the sound starts; Apple's encoders say it in iTunSMPB instead.
+      let edit = await this.parseFirstEdit(children, mdhd.timescale)
+      if (!edit.trimStart && this.gapless && mdhd.timescale) {
+        edit = {
+          trimStart: this.gapless.priming / mdhd.timescale,
+          ...(this.gapless.samples ? { trimmedDuration: this.gapless.samples / mdhd.timescale } : {}),
+        }
+      }
       const track: AudioTrack = {
         type: 'audio',
         id: tkhd.trackId,
@@ -327,11 +339,77 @@ export class Mp4Demuxer extends Demuxer {
         isDefault: (tkhd.flags & 0x1) !== 0,
         language: mdhd.language,
         codecDescription: this.extractCodecDescription(entry),
+        ...edit,
       }
       return track
     }
 
     return null
+  }
+
+  /**
+   * Apple's gapless playback record (the iTunes 'iTunSMPB' tag in
+   * moov/udta): hex fields, the second the priming samples, the fourth the
+   * real samples. Found by its name and the 'data' atom after it, so the
+   * metadata box's QuickTime and ISO layouts both read.
+   */
+  private async parseGaplessInfo(moovChildren: Box[]): Promise<{ priming: number, samples: number } | null> {
+    const udta = moovChildren.find(b => b.type === 'udta')
+    if (!udta || udta.size > 1024 * 1024)
+      return null
+    this.reader.position = udta.offset
+    const bytes = await this.reader.readBytes(udta.size)
+    if (!bytes)
+      return null
+    const text = new TextDecoder('latin1').decode(bytes)
+    const name = text.indexOf('iTunSMPB')
+    const data = name < 0 ? -1 : text.indexOf('data', name)
+    if (data < 0)
+      return null
+    const size = new DataView(bytes.buffer, bytes.byteOffset).getUint32(data - 4)
+    const fields = text.slice(data + 12, data - 4 + size).trim().split(/\s+/)
+    const priming = Number.parseInt(fields[1] ?? '', 16)
+    const samples = Number.parseInt(fields[3] ?? '', 16)
+    if (!Number.isFinite(priming) || priming < 0 || priming > 1_000_000)
+      return null
+    return { priming, samples: Number.isFinite(samples) && samples > 0 ? samples : 0 }
+  }
+
+  /**
+   * The part of a track's media meant to be played, from its edit list: the
+   * first edit that holds media (an empty one, media time -1, only delays the
+   * start). Seconds to skip at the start of the media, and how long to play.
+   */
+  private async parseFirstEdit(trakChildren: Box[], mediaTimescale: number): Promise<{ trimStart?: number, trimmedDuration?: number }> {
+    const elstBox = trakChildren.find(b => b.type === 'edts')?.children?.find(b => b.type === 'elst')
+    if (!elstBox || !mediaTimescale)
+      return {}
+    this.reader.position = elstBox.offset + BOX_HEADER_SIZE
+    const version = await this.reader.readU8()
+    await this.reader.skip(3)
+    const count = (await this.reader.readU32BE()) ?? 0
+    for (let i = 0; i < count; i++) {
+      let segmentDuration: number
+      let mediaTime: number
+      if (version === 1) {
+        segmentDuration = Number((await this.reader.readU64BE()) ?? 0n)
+        mediaTime = Number(BigInt.asIntN(64, (await this.reader.readU64BE()) ?? 0n))
+      }
+      else {
+        segmentDuration = (await this.reader.readU32BE()) ?? 0
+        mediaTime = ((await this.reader.readU32BE()) ?? 0) | 0
+      }
+      await this.reader.skip(4)
+      if (mediaTime === -1)
+        continue
+      const edit: { trimStart?: number, trimmedDuration?: number } = {}
+      if (mediaTime > 0)
+        edit.trimStart = mediaTime / mediaTimescale
+      if (segmentDuration > 0 && this.movieTimescale)
+        edit.trimmedDuration = segmentDuration / this.movieTimescale
+      return edit
+    }
+    return {}
   }
 
   private async parseTkhd(box: Box): Promise<{ trackId: number, flags: number, width: number, height: number, matrix: number[] }> {
