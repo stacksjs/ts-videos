@@ -1,5 +1,21 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.4...v0.3.0)
+
+## 🚀 Features
+
+- **audio**: decode Opus in TypeScript, from Ogg and WebM, no ffmpeg ([847c010](https://github.com/stacksjs/ts-videos/commit/847c010)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **audio**: decode AAC and WAV to samples and speech-ready WAV, no ffmpeg ([87dde45](https://github.com/stacksjs/ts-videos/commit/87dde45)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **mp4**: read where an audio track's sound starts and ends ([e06350f](https://github.com/stacksjs/ts-videos/commit/e06350f)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.3.0 ([682e750](https://github.com/stacksjs/ts-videos/commit/682e750)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.3...v0.2.4)
 
 ## 📚 Documentation
