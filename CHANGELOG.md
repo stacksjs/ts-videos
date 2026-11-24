@@ -1,5 +1,15 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.2...v0.2.3)
+
+## 🧹 Chores
+
+- release v0.2.3 ([c4a07b9](https://github.com/stacksjs/ts-videos/commit/c4a07b9)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.1...v0.2.2)
 
 ## 🚀 Features
