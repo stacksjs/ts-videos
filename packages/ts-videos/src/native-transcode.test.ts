@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import type { Input } from './input'
 import type { Output } from './output'
-import { generateVideoDerivatives, transcodeVideoWithWebCodecs } from './native-transcode'
+import { fitVideoSize, generateVideoDerivatives, transcodeVideoWithWebCodecs, uploadVideoBitrate, videoDecoderCodec, videoDisplaySize } from './native-transcode'
 
 describe('native video transcoding', () => {
   it('scales and streams video and audio into the selected muxer', async () => {
@@ -102,7 +102,8 @@ describe('native video transcoding', () => {
         batchSize: 1,
       })
       expect(result).toMatchObject({ videoCodec: 'h264', audioCodec: 'aac', videoPackets: 1, audioPackets: 1, inputBytes: 4, outputBytes: 5 })
-      expect(written.map(packet => packet.trackId)).toEqual([4, 5])
+      // A video packet waits for the next one to learn its length, so the audio packet is written first.
+      expect(written.map(packet => packet.trackId).sort()).toEqual([4, 5])
 
       const derivatives = await generateVideoDerivatives(new Uint8Array([1]), {
         source: { width: 1920, height: 1080, duration: 1, frameRate: 30, container: 'webm', videoCodec: 'vp9', audioCodec: 'opus' },
@@ -118,5 +119,40 @@ describe('native video transcoding', () => {
     finally {
       Object.assign(globalThis, originals)
     }
+  })
+
+  it('fits a frame into a box either way up, in even pixels, without enlarging it', () => {
+    expect(fitVideoSize({ width: 1920, height: 1080 }, { long: 1280, short: 720 })).toEqual({ width: 1280, height: 720 })
+    expect(fitVideoSize({ width: 1080, height: 1920 }, { long: 1280, short: 720 })).toEqual({ width: 720, height: 1280 })
+    expect(fitVideoSize({ width: 3840, height: 2160 }, { long: 1280, short: 720 })).toEqual({ width: 1280, height: 720 })
+    expect(fitVideoSize({ width: 640, height: 360 }, { long: 1280, short: 720 })).toEqual({ width: 640, height: 360 })
+    // 4:3 is held by the short edge, and an odd result is rounded down to even.
+    expect(fitVideoSize({ width: 1440, height: 1080 }, { long: 1280, short: 720 })).toEqual({ width: 960, height: 720 })
+    expect(fitVideoSize({ width: 1000, height: 563 }, { long: 1280, short: 720 })).toEqual({ width: 1000, height: 562 })
+    expect(() => fitVideoSize({ width: 0, height: 720 }, { long: 1280, short: 720 })).toThrow()
+  })
+
+  it('shows a quarter-turned track with its edges swapped', () => {
+    expect(videoDisplaySize({ width: 1920, height: 1080, rotation: 90 })).toEqual({ width: 1080, height: 1920 })
+    expect(videoDisplaySize({ width: 1920, height: 1080, rotation: 270 })).toEqual({ width: 1080, height: 1920 })
+    expect(videoDisplaySize({ width: 1920, height: 1080, rotation: 180 })).toEqual({ width: 1920, height: 1080 })
+    expect(videoDisplaySize({ width: 1920, height: 1080 })).toEqual({ width: 1920, height: 1080 })
+  })
+
+  it('names the decoder codec from the track\'s own record', () => {
+    // avcC: version 1, High, no constraints, level 5.1.
+    expect(videoDecoderCodec({ codec: 'h264', codecDescription: new Uint8Array([1, 0x64, 0x00, 0x33, 0xFF]) })).toBe('avc1.640033')
+    // hvcC: Main 10 (profile 2), main tier, compatibility 0x20000000, level 5.1 (153), constraint 0x90.
+    const hvcc = new Uint8Array(23)
+    hvcc.set([1, 0x02, 0x20, 0, 0, 0, 0x90, 0, 0, 0, 0, 0, 153])
+    expect(videoDecoderCodec({ codec: 'h265', codecDescription: hvcc })).toBe('hvc1.2.4.L153.90')
+    expect(videoDecoderCodec({ codec: 'h264' })).toBe('avc1.640028')
+    expect(videoDecoderCodec({ codec: 'vp9' })).toBe('vp09.00.10.08')
+  })
+
+  it('asks about 2.5 Mbit/s for 720p30 and never less than 400 kbit/s', () => {
+    expect(uploadVideoBitrate(1280, 720, 30)).toBe(2_490_000)
+    expect(uploadVideoBitrate(1280, 720, 60)).toBe(2_490_000)
+    expect(uploadVideoBitrate(320, 180, 24)).toBe(400_000)
   })
 })
