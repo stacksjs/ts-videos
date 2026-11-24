@@ -236,6 +236,7 @@
     "@ts-videos/webm": "workspace:*"
   },
   "dependencies": {
-    "bunfig": "^0.15.6"
+    "bunfig": "^0.15.6",
+    "ts-gif": "^0.1.6"
   }
 }
