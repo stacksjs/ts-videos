@@ -40,6 +40,28 @@ export class Writer {
     }
   }
 
+  /**
+   * Overwrites bytes already written, without moving the write position: a
+   * box's size that is only known once its contents are out. A target takes
+   * the write at its offset; in memory the bytes are set where they lie.
+   */
+  async patch(position: number, bytes: Uint8Array): Promise<void> {
+    if (position < 0 || position + bytes.byteLength > this.pos) throw new RangeError('A patch must lie inside what has been written')
+    await this.flushBuffer()
+    if (this.target) {
+      await this.target.write(bytes, position)
+      return
+    }
+    let start = 0
+    for (const chunk of this.chunks) {
+      const end = start + chunk.byteLength
+      const from = Math.max(position, start)
+      const to = Math.min(position + bytes.byteLength, end)
+      if (from < to) chunk.set(bytes.subarray(from - position, to - position), from - start)
+      start = end
+    }
+  }
+
   async writeBytes(bytes: Uint8Array): Promise<void> {
     if (bytes.length > this.bufferSize - this.bufferPos) {
       await this.flushBuffer()

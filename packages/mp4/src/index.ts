@@ -200,3 +200,4 @@ export const MP4_OUTPUT: Mp4OutputFormat = new Mp4OutputFormat()
 export const MOV_OUTPUT: MovOutputFormat = new MovOutputFormat()
 export const FMP4_OUTPUT: FragmentedMp4OutputFormat = new FragmentedMp4OutputFormat()
 export const CMAF_OUTPUT: CmafOutputFormat = new CmafOutputFormat()
+export * from './aac'

@@ -2,6 +2,7 @@
  * MP4/MOV demuxer implementation
  */
 
+import { audioSpecificConfigFromEsds } from './aac'
 import type { Source } from 'ts-videos/reader'
 import type { Track, VideoTrack, AudioTrack, Metadata, EncodedPacket, VideoCodec, AudioCodec, ColorSpace } from 'ts-videos/types'
 import { Demuxer } from 'ts-videos/demuxer'
@@ -450,13 +451,41 @@ export class Mp4Demuxer extends Demuxer {
         })
       }
       else if (isAudioHandler(handlerType)) {
-        await this.reader.skip(8)
-        const channelCount = (await this.reader.readU16BE()) ?? 2
+        // A QuickTime sound description states its version: 0 is the plain one
+        // an MP4 has, 1 and 2 carry more fields before any box.
+        const soundVersion = (await this.reader.readU16BE()) ?? 0
+        await this.reader.skip(6)
+        let channelCount = (await this.reader.readU16BE()) ?? 2
         const sampleSize = (await this.reader.readU16BE()) ?? 16
         await this.reader.skip(4)
-        const sampleRate = ((await this.reader.readU32BE()) ?? 44100 << 16) >>> 16
+        // Unsigned: 48000 in 16.16 has its top bit set, and `>> 16` read it as -17536.
+        let sampleRate = ((await this.reader.readU32BE()) ?? 44100 * 65536) >>> 16
+        if (soundVersion === 1) {
+          await this.reader.skip(16)
+        }
+        else if (soundVersion === 2) {
+          // sizeOfStructOnly, a 64-bit float rate, the channel count, then five more fields.
+          await this.reader.skip(4)
+          const rate = await this.reader.readBytes(8)
+          if (rate) sampleRate = Math.round(new DataView(rate.buffer, rate.byteOffset, 8).getFloat64(0)) || sampleRate
+          channelCount = (await this.reader.readU32BE()) ?? channelCount
+          await this.reader.skip(20)
+        }
 
         const extensions = await this.parseExtensions(startPos + entrySize - 8)
+        // QuickTime keeps the decoder's record one level down, in a `wave` box.
+        // Read flat, an iPhone clip's sound had no record at all.
+        for (const wave of extensions.filter(box => box.type === 'wave' && box.data)) {
+          const data = wave.data!
+          const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
+          for (let at = 0; at + 8 <= data.byteLength;) {
+            const size = view.getUint32(at)
+            if (size < 8 || at + size > data.byteLength) break
+            const type = String.fromCharCode(data[at + 4], data[at + 5], data[at + 6], data[at + 7])
+            if (type === 'esds') extensions.push({ type, size, offset: wave.offset + 8 + at, data: data.subarray(at + 8, at + size) })
+            at += size
+          }
+        }
 
         entries.push({
           type: entryType,
@@ -599,8 +628,13 @@ export class Mp4Demuxer extends Demuxer {
 
   private extractCodecDescription(entry: VideoSampleEntry | AudioSampleEntry): Uint8Array | undefined {
     for (const ext of entry.extensions) {
-      if (ext.type === 'avcC' || ext.type === 'hvcC' || ext.type === 'av1C' || ext.type === 'esds') {
+      if (ext.type === 'avcC' || ext.type === 'hvcC' || ext.type === 'av1C') {
         return ext.data
+      }
+      // The decoder's own record, not the box around it: what WebCodecs and a
+      // Matroska file take, and what the muxers wrap again.
+      if (ext.type === 'esds' && ext.data) {
+        return audioSpecificConfigFromEsds(ext.data) ?? ext.data
       }
     }
     return undefined

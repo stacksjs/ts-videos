@@ -3,6 +3,7 @@
  * Supports streaming output with movie fragments (moof + mdat)
  */
 
+import { esdsPayloadFor } from './aac'
 import type { Target } from 'ts-videos/writer'
 import type { EncodedPacket } from 'ts-videos/types'
 import { Muxer } from 'ts-videos/muxer'
@@ -553,7 +554,7 @@ export class FragmentedMp4Muxer extends Muxer {
 
     let codecBox = ''
     if (config.codec === 'h264') codecBox = 'avc1'
-    else if (config.codec === 'h265') codecBox = 'hev1'
+    else if (config.codec === 'h265') codecBox = 'hvc1'
     else if (config.codec === 'vp9') codecBox = 'vp09'
     else if (config.codec === 'av1') codecBox = 'av01'
     else codecBox = 'mp4v'
@@ -606,7 +607,8 @@ export class FragmentedMp4Muxer extends Muxer {
     if (config.codec === 'opus') codecBox = 'Opus'
     else if (config.codec === 'flac') codecBox = 'fLaC'
 
-    const codecConfig = config.codecDescription ?? new Uint8Array(0)
+    // AAC always gets a well-formed esds, built from whatever record the track came with.
+    const codecConfig = config.codec === 'aac' ? esdsPayloadFor(config) : config.codecDescription ?? new Uint8Array(0)
     const configBoxSize = codecConfig.byteLength > 0 ? 8 + codecConfig.byteLength : 0
 
     const size = 36 + configBoxSize

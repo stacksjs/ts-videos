@@ -2,6 +2,7 @@
  * MP4/MOV muxer implementation
  */
 
+import { esdsPayloadFor } from './aac'
 import { createMp4ChapterAtom } from 'ts-videos/chapters'
 import type { Target } from 'ts-videos/writer'
 import type { VideoTrackConfig, AudioTrackConfig, SubtitleTrackConfig, EncodedPacket } from 'ts-videos/types'
@@ -16,8 +17,6 @@ interface Mp4TrackData {
   track: OutputVideoTrack | OutputAudioTrack | OutputSubtitleTrack
   timescale: number
   samples: Mp4Sample[]
-  chunkOffsets: number[]
-  currentChunk: { samples: Mp4Sample[], offset: number } | null
 }
 
 interface Mp4Sample {
@@ -27,7 +26,16 @@ interface Mp4Sample {
   isKeyframe: boolean
   compositionTimeOffset: number
   size: number
+  /**
+   * Where the sample's bytes lie: in the file, when they are written as they
+   * come; from the start of the media data, when the index goes first and
+   * they are laid out at the end (`layOutSamples`).
+   */
+  offset: number
 }
+
+/** Seconds of one track kept together before the next track's samples for the same stretch. */
+const INTERLEAVE_SECONDS = 0.5
 
 export interface Mp4MuxerOptions {
   fastStart?: boolean
@@ -86,8 +94,6 @@ export class Mp4Muxer extends Muxer {
       track,
       timescale,
       samples: [],
-      chunkOffsets: [],
-      currentChunk: null,
     })
   }
 
@@ -95,8 +101,13 @@ export class Mp4Muxer extends Muxer {
     await this.writeFtyp()
 
     if (!this.options.fastStart) {
+      // The long form of the header, its size filled in by the trailer: it was
+      // written as an empty box and never corrected, so a file with its index
+      // last had no media data a reader could find.
       this.mdatStart = this.writer.position
-      await this.writeMdatHeader(0)
+      await this.writer.writeU32BE(1)
+      await this.writer.writeFourCC('mdat')
+      await this.writer.writeU64BE(16n)
     }
   }
 
@@ -149,33 +160,27 @@ export class Mp4Muxer extends Muxer {
       isKeyframe: packet.isKeyframe,
       compositionTimeOffset: packet.compositionTimeOffset ?? 0,
       size: packet.data.byteLength,
+      offset: 0,
     }
 
     if (this.options.fastStart) {
       data.samples.push(sample)
     }
     else {
-      const offset = this.writer.position
+      sample.offset = this.writer.position
       await this.writer.writeBytes(packet.data)
       this.mdatSize += packet.data.byteLength
-
-      sample.size = packet.data.byteLength
       data.samples.push(sample)
-
-      if (!data.currentChunk) {
-        data.currentChunk = { samples: [], offset }
-        data.chunkOffsets.push(offset)
-      }
-      data.currentChunk.samples.push(sample)
     }
   }
 
   protected async writeTrailer(): Promise<void> {
     if (this.options.fastStart) {
+      // Before the index is built: it records where each sample will lie.
+      const ordered = this.layOutSamples()
       const moovData = await this.buildMoov(0)
 
       this.mdatStart = this.writer.position + moovData.byteLength + 8
-      await this.adjustChunkOffsets(this.mdatStart)
 
       const finalMoov = await this.buildMoov(this.mdatStart)
       await this.writer.writeBytes(finalMoov)
@@ -195,11 +200,9 @@ export class Mp4Muxer extends Muxer {
 
       await this.writeMdatHeader(mdatSize)
 
-      // Write user track samples
-      for (const data of this.trackData.values()) {
-        for (const sample of data.samples) {
-          await this.writer.writeBytes(sample.data)
-        }
+      // Write user track samples, in the order their offsets were given.
+      for (const sample of ordered) {
+        await this.writer.writeBytes(sample.data)
       }
 
       // Write chapter text samples
@@ -208,20 +211,57 @@ export class Mp4Muxer extends Muxer {
       }
     }
     else {
-      const moov = await this.buildMoov(this.mdatStart + 8)
+      const size = new Uint8Array(8)
+      new DataView(size.buffer).setBigUint64(0, BigInt(16 + this.mdatSize))
+      await this.writer.patch(this.mdatStart + 8, size)
+      const moov = await this.buildMoov(this.mdatStart + 16)
       await this.writer.writeBytes(moov)
     }
   }
 
-  private async adjustChunkOffsets(mdatStart: number): Promise<void> {
-    let offset = mdatStart
+  /**
+   * Decides where every sample goes in the media data when the index is
+   * written first, and gives each its offset from the start of that data.
+   *
+   * Tracks are interleaved half a second at a time, by each track's own
+   * running clock: a player reading the file from the front finds the sound
+   * for a picture beside it, not after the last frame. One track after
+   * another, a clip could not start until the whole file had arrived.
+   */
+  private layOutSamples(): Mp4Sample[] {
+    const keyed: { sample: Mp4Sample, stretch: number, track: number, index: number }[] = []
+    let track = 0
     for (const data of this.trackData.values()) {
-      data.chunkOffsets = []
-      for (const sample of data.samples) {
-        data.chunkOffsets.push(offset)
-        offset += sample.size
-      }
+      let clock = 0
+      data.samples.forEach((sample, index) => {
+        keyed.push({ sample, stretch: Math.floor(clock / INTERLEAVE_SECONDS + 1e-9), track, index })
+        clock += sample.duration
+      })
+      track++
     }
+    keyed.sort((a, b) => a.stretch - b.stretch || a.track - b.track || a.index - b.index)
+    let offset = 0
+    for (const { sample } of keyed) {
+      sample.offset = offset
+      offset += sample.size
+    }
+    return keyed.map(item => item.sample)
+  }
+
+  /**
+   * A track's chunks: each run of samples whose bytes follow one another.
+   * `stsc` and `stco` are both read from this, so they cannot disagree.
+   */
+  private chunksOf(data: Mp4TrackData): { offset: number, samples: number }[] {
+    const chunks: { offset: number, samples: number }[] = []
+    let end = -1
+    for (const sample of data.samples) {
+      const last = chunks[chunks.length - 1]
+      if (last && sample.offset === end) last.samples++
+      else chunks.push({ offset: sample.offset, samples: 1 })
+      end = sample.offset + sample.size
+    }
+    return chunks
   }
 
   private async buildMoov(mdatOffset: number): Promise<Uint8Array> {
@@ -395,18 +435,25 @@ export class Mp4Muxer extends Muxer {
     await writer.writeU16BE(volume)
     await writer.writeU16BE(0)
 
-    await writer.writeU32BE(0x00010000)
-    await writer.writeU32BE(0)
-    await writer.writeU32BE(0)
-    await writer.writeU32BE(0)
-    await writer.writeU32BE(0x00010000)
-    await writer.writeU32BE(0)
-    await writer.writeU32BE(0)
-    await writer.writeU32BE(0)
+    // The display matrix: how the stored frame is turned to be shown. It was
+    // always the identity, so a remuxed phone clip (stored on its side, with a
+    // quarter turn) played sideways. The offsets keep the turned frame in view.
+    const rotation = track.type === 'video' ? track.config.rotation ?? 0 : 0
+    const one = 0x00010000
+    const minusOne = 0xFFFF0000
+    const matrix = rotation === 90
+      ? [0, one, 0, minusOne, 0, 0, height * 65536, 0]
+      : rotation === 180
+        ? [minusOne, 0, 0, 0, minusOne, 0, width * 65536, height * 65536]
+        : rotation === 270
+          ? [0, minusOne, 0, one, 0, 0, 0, width * 65536]
+          : [one, 0, 0, 0, one, 0, 0, 0]
+    for (const value of matrix) await writer.writeU32BE(value)
     await writer.writeU32BE(0x40000000)
 
-    await writer.writeU32BE(width << 16)
-    await writer.writeU32BE(height << 16)
+    // 16.16 fixed point, by multiplying: `<< 16` is a signed shift.
+    await writer.writeU32BE(width * 65536)
+    await writer.writeU32BE(height * 65536)
 
     return writer.getBuffer()
   }
@@ -654,7 +701,9 @@ export class Mp4Muxer extends Muxer {
 
     let codecBox = ''
     if (config.codec === 'h264') codecBox = 'avc1'
-    else if (config.codec === 'h265') codecBox = 'hev1'
+    // hvc1, parameter sets in the hvcC record, which is how every packet reaches
+    // this muxer and the only H.265 tag Safari plays in an MP4.
+    else if (config.codec === 'h265') codecBox = 'hvc1'
     else if (config.codec === 'vp9') codecBox = 'vp09'
     else if (config.codec === 'av1') codecBox = 'av01'
     else if (config.codec === 'prores') {
@@ -727,7 +776,8 @@ export class Mp4Muxer extends Muxer {
     if (config.codec === 'opus') codecBox = 'Opus'
     else if (config.codec === 'flac') codecBox = 'fLaC'
 
-    const codecConfig = config.codecDescription ?? new Uint8Array(0)
+    // AAC always gets a well-formed esds, built from whatever record the track came with.
+    const codecConfig = config.codec === 'aac' ? esdsPayloadFor(config) : config.codecDescription ?? new Uint8Array(0)
     const configBoxSize = codecConfig.byteLength > 0 ? 8 + codecConfig.byteLength : 0
 
     const size = 36 + configBoxSize
@@ -745,7 +795,9 @@ export class Mp4Muxer extends Muxer {
     await writer.writeU16BE(config.bitsPerSample ?? 16)
     await writer.writeU16BE(0)
     await writer.writeU16BE(0)
-    await writer.writeU32BE(config.sampleRate << 16)
+    // 16.16 fixed point in an unsigned field: 48000 << 16 is negative in JavaScript.
+    // Rates that do not fit 16 bits (88.2 and 96 kHz) are written as 0, and read from the codec's own record.
+    await writer.writeU32BE(config.sampleRate < 65536 ? config.sampleRate * 65536 : 0)
 
     if (configBoxSize > 0) {
       await writer.writeU32BE(configBoxSize)
@@ -827,15 +879,21 @@ export class Mp4Muxer extends Muxer {
   private async buildStsc(data: Mp4TrackData): Promise<Uint8Array> {
     const writer = new Writer()
 
-    const size = 28
+    // One entry for each run of chunks that hold the same number of samples.
+    const entries: { firstChunk: number, samples: number }[] = []
+    this.chunksOf(data).forEach((chunk, index) => {
+      if (entries[entries.length - 1]?.samples !== chunk.samples) entries.push({ firstChunk: index + 1, samples: chunk.samples })
+    })
 
-    await writer.writeU32BE(size)
+    await writer.writeU32BE(16 + entries.length * 12)
     await writer.writeFourCC('stsc')
     await writer.writeU32BE(0)
-    await writer.writeU32BE(1)
-    await writer.writeU32BE(1)
-    await writer.writeU32BE(1)
-    await writer.writeU32BE(1)
+    await writer.writeU32BE(entries.length)
+    for (const entry of entries) {
+      await writer.writeU32BE(entry.firstChunk)
+      await writer.writeU32BE(entry.samples)
+      await writer.writeU32BE(1)
+    }
 
     return writer.getBuffer()
   }
@@ -861,13 +919,12 @@ export class Mp4Muxer extends Muxer {
   private async buildStco(data: Mp4TrackData, mdatOffset: number): Promise<Uint8Array> {
     const writer = new Writer()
 
-    let offset = mdatOffset
-    const offsets: number[] = []
-
-    for (const sample of data.samples) {
-      offsets.push(offset)
-      offset += sample.size
-    }
+    // Each track restarted at the first byte of the media data, so in any file
+    // with two tracks the second one's index pointed into the first one's
+    // samples: sound that no decoder could read. Samples written as they came
+    // already hold their place in the file.
+    const base = this.options.fastStart ? mdatOffset : 0
+    const offsets = this.chunksOf(data).map(chunk => base + chunk.offset)
 
     const size = 16 + offsets.length * 4
 
