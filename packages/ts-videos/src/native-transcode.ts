@@ -728,9 +728,24 @@ export interface UploadVideoOptions {
   audioBitrate?: number
   /** A JPEG of one frame beside the video. Default true. */
   poster?: boolean | { at?: number, quality?: number }
+  /**
+   * The most the result may weigh, judged from the clip's length before any
+   * of it is encoded. The whole output is held in memory until it is done, so
+   * a clip that would not be accepted anyway is refused at once
+   * (`UploadVideoTooLargeError`) instead of after minutes of encoding.
+   */
+  maxOutputBytes?: number
   signal?: AbortSignal
   onProgress?: (_progress: NativeVideoTranscodeProgress) => void
   inputFormats?: InputFormat[]
+}
+
+/** The prepared clip would be larger than `maxOutputBytes`: it is too long for the limit, whatever its picture size. */
+export class UploadVideoTooLargeError extends Error {
+  constructor(readonly estimatedBytes: number, readonly maxOutputBytes: number) {
+    super(`The prepared video would be about ${Math.round(estimatedBytes / 1024 / 1024)} MB, over the ${Math.round(maxOutputBytes / 1024 / 1024)} MB limit`)
+    this.name = 'UploadVideoTooLargeError'
+  }
 }
 
 export interface UploadVideo {
@@ -795,6 +810,11 @@ export async function prepareVideoForUpload(file: Blob, options: UploadVideoOpti
     const light = duration > 0 && file.size * 8 / duration <= (videoBitrate + audioBitrate) * 1.25
     if (format === 'mp4' && track.codec === 'h264' && (!audio || audio.codec === 'aac') && !track.rotation && !isHdr(track) && fits && frameRate === sourceRate && light) {
       return { video: file, unchanged: true, width: shown.width, height: shown.height, duration, frameRate, sourceBytes: file.size }
+    }
+
+    const estimatedBytes = Math.ceil(duration * (videoBitrate + audioBitrate) / 8)
+    if (options.maxOutputBytes !== undefined && estimatedBytes > options.maxOutputBytes) {
+      throw new UploadVideoTooLargeError(estimatedBytes, options.maxOutputBytes)
     }
 
     const mp4 = await import('@ts-videos/mp4')
