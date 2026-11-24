@@ -1,6 +1,9 @@
 // Configuration
 export { config } from './config'
 
+// Audio decoding (no ffmpeg): files to samples and speech-ready WAV
+export * from './audio-decode'
+
 // Types
 export * from './types'
 export * from './delivery'
