@@ -14,14 +14,18 @@ export const defaultConfig: VideosConfig = {
  * page: the WebCodecs transcoder, which only runs in one, least of all.
  */
 async function loadVideosConfig(): Promise<VideosConfig> {
-  const runtime = globalThis as { document?: unknown, process?: { versions?: { node?: string } } }
+  const runtime = globalThis as { document?: unknown, process?: { versions?: { node?: string }, cwd?: () => string } }
   if (runtime.document !== undefined || !runtime.process?.versions?.node) return { ...defaultConfig }
   try {
-    const modules = ['bunfig', 'node:path', 'node:url']
-    const [{ loadConfig }, { dirname, resolve }, { fileURLToPath }] = await Promise.all(modules.map(name => import(name)))
+    // Joined at run time: a minifier folds a constant name back into `import('bunfig')`, and a page bundler follows that.
+    const loader = ['bun', 'fig'].join('')
+    const { loadConfig } = await import(loader)
+    // From the project being run, where its videos.config.ts is. No
+    // `import.meta` here: a bundler that sees it makes the whole page bundle a
+    // module script.
     return await loadConfig({
       name: 'videos',
-      cwd: resolve(dirname(fileURLToPath(import.meta.url)), '..'),
+      cwd: runtime.process.cwd?.(),
       defaultConfig,
     })
   }
@@ -30,5 +34,13 @@ async function loadVideosConfig(): Promise<VideosConfig> {
   }
 }
 
-// eslint-disable-next-line ts/no-top-level-await
-export const config: VideosConfig = await loadVideosConfig()
+/**
+ * The defaults at once, a `videos.config.ts` a moment later.
+ *
+ * Not awaited at the top of the module: a top-level await cannot be bundled
+ * into a classic script, so every page bundle that reached a muxer failed to
+ * build. The only setting is `verbose`, read each time something is logged,
+ * so a file's value takes effect as soon as it has loaded.
+ */
+export const config: VideosConfig = { ...defaultConfig }
+void loadVideosConfig().then(loaded => Object.assign(config, loaded))
