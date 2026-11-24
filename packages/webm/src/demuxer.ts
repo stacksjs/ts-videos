@@ -480,21 +480,34 @@ export class WebmDemuxer extends Demuxer {
     }
   }
 
+  /**
+   * Blocks passed over while looking for another track's, by track, in file
+   * order. The file has one cursor, and a block of the wrong track used to be
+   * thrown away: read two tracks in turn (`allPackets`) and each lost every
+   * block the other's search walked past, about four in ten of the sound.
+   */
+  private waiting: Map<number, EncodedPacket[]> = new Map()
+
   async readPacket(trackId: number): Promise<EncodedPacket | null> {
+    const kept = this.waiting.get(trackId)
+    if (kept?.length) return kept.shift()!
+
     while (true) {
       if (this.currentBlockIndex < this.currentClusterBlocks.length) {
         const block = this.currentClusterBlocks[this.currentBlockIndex]
         this.currentBlockIndex++
 
-        if (block.trackNumber === trackId) {
-          return {
-            data: block.data,
-            timestamp: block.timestamp * this.timestampScale / 1000000000,
-            duration: block.duration ? block.duration * this.timestampScale / 1000000000 : undefined,
-            isKeyframe: block.isKeyframe,
-            trackId,
-          }
+        const packet: EncodedPacket = {
+          data: block.data,
+          timestamp: block.timestamp * this.timestampScale / 1000000000,
+          duration: block.duration ? block.duration * this.timestampScale / 1000000000 : undefined,
+          isKeyframe: block.isKeyframe,
+          trackId: block.trackNumber,
         }
+        if (block.trackNumber === trackId) return packet
+        const queue = this.waiting.get(block.trackNumber)
+        if (queue) queue.push(packet)
+        else this.waiting.set(block.trackNumber, [packet])
         continue
       }
 
@@ -624,5 +637,6 @@ export class WebmDemuxer extends Demuxer {
     this.currentClusterIndex = targetCluster
     this.currentBlockIndex = 0
     this.currentClusterBlocks = []
+    this.waiting.clear()
   }
 }
