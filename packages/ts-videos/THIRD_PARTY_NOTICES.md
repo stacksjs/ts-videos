@@ -2,11 +2,13 @@
 
 ts-videos is MIT licensed. Parts of it are derived from the following works.
 
-## PacketVideo AAC decoder (Android Open Source Project)
+## PacketVideo AAC and MP3 decoders (Android Open Source Project)
 
 `src/aac-tables.ts` (the AAC Huffman codebooks and scale factor band tables)
-is derived from the PacketVideo AAC decoder in the Android Open Source
-Project.
+is derived from the PacketVideo AAC decoder, and `src/mp3/mp3-tables.ts`
+(the MP3 Huffman codebooks, scale factor band and partition tables and the
+synthesis window) from the PacketVideo MP3 decoder, both in the Android Open
+Source Project.
 
 Copyright (C) 1998-2009 PacketVideo
 

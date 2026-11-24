@@ -22,6 +22,7 @@ ts-videos reads, inspects and rewrites audio and video containers in plain TypeS
 - **Metadata**: chapters, cover art, ID3, Vorbis comments, MP4 and Matroska tags
 - **Codec parsing**: H.264, H.265 and AAC configuration records, codec strings for `MediaSource` and HLS
 - **Colour and HDR**: HDR10, HLG and Dolby Vision detection, tone mapping and gamut conversion
+- **Decode audio**: AAC (M4A), Opus (Ogg, WebM), MP3 and WAV to samples, or to the 16 kHz mono WAV speech-to-text takes, on the server too
 - **Audio**: loudness (EBU R128), waveforms and audio analysis
 - **CLI**: `info`, `convert` and `extract` from the terminal
 
@@ -117,6 +118,21 @@ async function prepare(file: File): Promise<Blob> {
 }
 ```
 
+### Decode audio
+
+`decodeAudioToWav` turns a voice note into what a speech-to-text service takes: a 16-bit WAV, 16 kHz mono unless asked otherwise. It reads the phone app's and Safari's M4A (AAC), Chrome's WebM and Firefox's and WhatsApp's Ogg (Opus), MP3 and WAV, all in TypeScript.
+
+```ts
+import { decodeAudio, decodeAudioToWav } from 'ts-videos'
+
+const wav = await decodeAudioToWav(upload, { maxBytes: 12 * 1024 * 1024, maxDurationSeconds: 300 })
+// wav.audio is the WAV file's bytes; wav.durationSeconds how long it plays
+
+const { sampleRate, channels } = await decodeAudio('interview.mp3') // one Float32Array per channel
+```
+
+The decoders cover AAC-LC (and the AAC-LC core of HE-AAC), Opus in all three modes, MP3 (MPEG-1, MPEG-2 and MPEG 2.5 Layer III) and PCM. The encoder's delay and padding are trimmed when the file records them, so the samples start and end where the sound does. Other codecs, such as Vorbis and FLAC, throw `UnsupportedAudioCodecError`; `registerAudioDecoder` adds one. Audio over `maxDurationSeconds` throws `AudioTooLongError` as soon as the decoded part is longer.
+
 ### Subtitles
 
 ```ts
@@ -140,6 +156,7 @@ ts-videos has no video encoders or decoders of its own. Re-encoding uses WebCode
 | | Browser | Bun / Node |
 | --- | --- | --- |
 | Inspect, remux, trim, extract | ✅ | ✅ |
+| Decode audio (AAC, Opus, MP3, WAV) | ✅ | ✅ |
 | Playlists, subtitles, metadata, chapters | ✅ | ✅ |
 | Re-encode, resize, change bitrate | ✅ | ❌ |
 | Posters and preview thumbnails | ✅ | ❌ |

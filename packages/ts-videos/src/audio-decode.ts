@@ -5,19 +5,24 @@
  * `decodeAudioToWav` also resamples, mixes down and writes a 16-bit WAV, the
  * shape a speech-to-text service takes (16 kHz mono by default).
  *
- * WAV and Ogg Opus are read here directly. Every other container goes
- * through the input formats (MP4, MOV and M4A from @ts-videos/mp4, WebM and
- * MKV from @ts-videos/webm). AAC and Opus are decoded here, in TypeScript;
- * other codecs plug in with `registerAudioDecoder`. PCM needs no decoder.
+ * WAV, Ogg Opus and MP3 files are read here directly. Every other container
+ * goes through the input formats (MP4, MOV and M4A from @ts-videos/mp4, WebM
+ * and MKV from @ts-videos/webm, MPEG-TS from @ts-videos/ts). AAC, Opus and
+ * MP3 are decoded here, in TypeScript; other codecs plug in with
+ * `registerAudioDecoder`. PCM needs no decoder.
  */
 
 import type { InputFormat } from './demuxer'
 import type { Source } from './reader'
 import type { AudioCodec, AudioTrack, EncodedPacket } from './types'
 import { createAacDecoder } from './aac-decoder'
-import { createOpusDecoder, decodeOggOpus, isOgg } from './opus/opus-audio'
+import { AudioTooLongError, UnsupportedAudioCodecError } from './audio-errors'
 import { Input } from './input'
+import { createMp3Decoder, decodeMp3File, isMp3 } from './mp3/mp3-audio'
+import { createOpusDecoder, decodeOggOpus, isOgg } from './opus/opus-audio'
 import { createSource } from './source'
+
+export { AudioTooLongError, UnsupportedAudioCodecError } from './audio-errors'
 
 /** Planar samples: one Float32Array per channel, each in -1 to 1. */
 export interface DecodedAudio {
@@ -48,27 +53,12 @@ export interface AudioPacketDecoder {
 
 export type AudioDecoderFactory = (_track: AudioTrack) => AudioPacketDecoder
 
-/** A track whose codec no registered decoder reads. */
-export class UnsupportedAudioCodecError extends Error {
-  constructor(readonly codec: string) {
-    super(`Decoding ${codec} audio is not supported`)
-    this.name = 'UnsupportedAudioCodecError'
-  }
-}
-
-/** Audio longer than the limit allows: refused once the decoded part shows it, not after decoding all of it. */
-export class AudioTooLongError extends Error {
-  constructor(readonly maxDurationSeconds: number) {
-    super(`Audio duration exceeds the ${maxDurationSeconds} second limit`)
-    this.name = 'AudioTooLongError'
-  }
-}
-
 const decoders = new Map<string, AudioDecoderFactory>()
 
 /** The decoders that come with ts-videos; a registered decoder for the same codec takes precedence. */
 const builtInDecoders: Partial<Record<AudioCodec, AudioDecoderFactory>> = {
   aac: createAacDecoder,
+  mp3: createMp3Decoder,
   opus: createOpusDecoder,
 }
 
@@ -138,26 +128,16 @@ type AudioInput = Uint8Array | ArrayBuffer | Blob | string | Source
 /** Decodes the first audio track of a file to planar float samples at its own rate and channel count. */
 export async function decodeAudio(input: AudioInput, options: DecodeAudioOptions = {}): Promise<DecodedAudio> {
   options.signal?.throwIfAborted()
-  const bytes = input instanceof ArrayBuffer ? new Uint8Array(input) : input
-  if (options.maxBytes !== undefined) {
-    const size = bytes instanceof Uint8Array ? bytes.length : typeof Blob !== 'undefined' && bytes instanceof Blob ? bytes.size : null
-    if (size !== null && (size === 0 || size > options.maxBytes))
-      throw new Error('Audio size exceeds the upload limit or is empty')
-  }
+  let bytes = input instanceof ArrayBuffer ? new Uint8Array(input) : input
+  if (options.maxBytes !== undefined && bytes instanceof Uint8Array && (bytes.length === 0 || bytes.length > options.maxBytes))
+    throw new Error('Audio size exceeds the upload limit or is empty')
+  if (!(bytes instanceof Uint8Array))
+    bytes = await readWholeWhenDirect(bytes, options.maxBytes) ?? bytes
 
-  if (bytes instanceof Uint8Array && isOgg(bytes)) {
-    const decoded = decodeOggOpus(bytes, options.signal)
-    const duration = (decoded.channels[0]?.length ?? 0) / decoded.sampleRate
-    if (options.maxDurationSeconds !== undefined && duration > options.maxDurationSeconds)
-      throw new AudioTooLongError(options.maxDurationSeconds)
-    return { ...decoded, duration, codec: 'opus' }
-  }
-
-  if (bytes instanceof Uint8Array && isWav(bytes)) {
-    const decoded = decodeWav(bytes)
-    if (options.maxDurationSeconds !== undefined && decoded.duration > options.maxDurationSeconds)
-      throw new AudioTooLongError(options.maxDurationSeconds)
-    return decoded
+  if (bytes instanceof Uint8Array) {
+    const direct = decodeDirect(bytes, options)
+    if (direct)
+      return direct
   }
 
   const source = isSource(bytes) ? bytes : createSource(bytes as Uint8Array | Blob | string)
@@ -215,6 +195,68 @@ export async function decodeAudioToWav(input: AudioInput, options: DecodeAudioTo
   if (durationSeconds <= 0)
     throw new Error('Audio duration exceeds the recording limit or is empty')
   return { audio: encodeWav(samples, sampleRate), mimeType: 'audio/wav', durationSeconds, sampleRate, channels: channelCount }
+}
+
+/** WAV, Ogg Opus and MP3: files read here rather than through a container reader. */
+function decodeDirect(bytes: Uint8Array, options: DecodeAudioOptions): DecodedAudio | null {
+  const limit = options.maxDurationSeconds
+  let decoded: { sampleRate: number, channels: Float32Array[] }
+  let codec: AudioCodec
+  if (isOgg(bytes)) {
+    decoded = decodeOggOpus(bytes, options.signal)
+    codec = 'opus'
+  }
+  else if (isWav(bytes)) {
+    const wav = decodeWav(bytes)
+    decoded = wav
+    codec = wav.codec
+  }
+  else if (isMp3(bytes)) {
+    decoded = decodeMp3File(bytes, { signal: options.signal, maxDurationSeconds: limit })
+    codec = 'mp3'
+  }
+  else {
+    return null
+  }
+  const duration = (decoded.channels[0]?.length ?? 0) / decoded.sampleRate
+  if (limit !== undefined && duration > limit)
+    throw new AudioTooLongError(limit)
+  return { sampleRate: decoded.sampleRate, channels: decoded.channels, duration, codec }
+}
+
+/** The largest file read whole to look for WAV, Ogg or MP3 in it; anything bigger goes to the container readers. */
+const DIRECT_LIMIT = 256 * 1024 * 1024
+
+/**
+ * A path, Blob or Source whose first bytes look like WAV, Ogg or MP3, read
+ * whole; null for anything else, which the container readers take.
+ */
+async function readWholeWhenDirect(input: Blob | string | Source, maxBytes?: number): Promise<Uint8Array | null> {
+  const owned = !isSource(input)
+  const source = owned ? createSource(input as Blob | string) : input as Source
+  try {
+    const size = await source.getSize()
+    if (maxBytes !== undefined && size !== null && (size === 0 || size > maxBytes))
+      throw new Error('Audio size exceeds the upload limit or is empty')
+    if (size === null || size === 0 || size > DIRECT_LIMIT)
+      return null
+    const head = (await source.readSlice(0, Math.min(size, 12)))?.bytes
+    if (!head || !(isOgg(head) || startsWithText(head, 'RIFF') || startsWithText(head, 'RF64') || startsWithText(head, 'ID3') || (head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)))
+      return null
+    return (await source.readSlice(0, size))?.bytes ?? null
+  }
+  finally {
+    if (owned)
+      await source.close?.()
+  }
+}
+
+function startsWithText(bytes: Uint8Array, text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    if (bytes[i] !== text.charCodeAt(i))
+      return false
+  }
+  return true
 }
 
 function isSource(value: unknown): value is Source {

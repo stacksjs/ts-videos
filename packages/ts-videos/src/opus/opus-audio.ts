@@ -5,6 +5,7 @@
 
 import type { AudioPacketDecoder, DecodedAudioChunk } from '../audio-decode'
 import type { AudioTrack, EncodedPacket } from '../types'
+import { UnsupportedAudioCodecError } from '../audio-errors'
 import { OpusDecoder } from './opus-decoder'
 
 /** What an Opus stream says about itself (RFC 7845 section 5.1). */
@@ -127,7 +128,7 @@ export function decodeOggOpus(bytes: Uint8Array, signal?: AbortSignal): { sample
   const head = packets.length ? parseOpusHead(packets[0]) : null
   if (!head) {
     const id = packets[0] ? String.fromCharCode(...packets[0].subarray(1, 7)) : ''
-    throw new Error(id === 'vorbis' ? 'Decoding vorbis audio is not supported' : 'The Ogg file holds no Opus stream')
+    throw id === 'vorbis' ? new UnsupportedAudioCodecError('vorbis') : new Error('The Ogg file holds no Opus stream')
   }
   checkSupported(head)
   const decoder = new OpusDecoder(head.channels)
