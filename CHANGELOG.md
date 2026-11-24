@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.3...v0.2.4)
+
+## 📚 Documentation
+
+- rewrite the README for ts-videos ([8d2630c](https://github.com/stacksjs/ts-videos/commit/8d2630c)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.4 ([52cf387](https://github.com/stacksjs/ts-videos/commit/52cf387)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.2...v0.2.3)
 
 ## 🧹 Chores
