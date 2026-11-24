@@ -421,6 +421,7 @@ export async function transcodeVideoWithWebCodecs(
   let lastEncodedAt = 0
   let reported = -1
   let heldVideo: EncodedPacket | undefined
+  let lastGap: number | undefined
   let poster: Promise<Blob> | undefined
   let writes = Promise.resolve()
   const pending: PendingPacket[] = []
@@ -487,7 +488,10 @@ export async function transcodeVideoWithWebCodecs(
       // its own stated duration, so each packet waits for the one after it.
       if (heldVideo) {
         const gap = packet.timestamp - heldVideo.timestamp
-        if (gap > 0) heldVideo.duration = gap
+        if (gap > 0) {
+          heldVideo.duration = gap
+          lastGap = gap
+        }
         emitVideo(heldVideo)
       }
       heldVideo = packet
@@ -634,7 +638,10 @@ export async function transcodeVideoWithWebCodecs(
     await videoEncoder.flush()
     await audioEncoder?.flush()
     if (heldVideo) {
-      if (!(heldVideo.duration && heldVideo.duration > 0)) heldVideo.duration = 1 / frameRate
+      // The last frame has no next one to measure to. It is shown as long as the
+      // one before it was: its own stated length is the source's, which is half
+      // that when every other frame was dropped.
+      heldVideo.duration = lastGap ?? (heldVideo.duration && heldVideo.duration > 0 ? heldVideo.duration : 1 / frameRate)
       emitVideo(heldVideo)
       heldVideo = undefined
     }
