@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.3.0...v0.3.1)
+
+## 🐛 Bug Fixes
+
+- **deps**: declare ts-gif, which ts-videos imports ([05138b6](https://github.com/stacksjs/ts-videos/commit/05138b6)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.3.1 ([31ad609](https://github.com/stacksjs/ts-videos/commit/31ad609)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.4...v0.3.0)
 
 ## 🚀 Features
