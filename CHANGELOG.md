@@ -1,5 +1,27 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.0...v0.2.1)
+
+## 🚀 Features
+
+- **transcode**: prepare a picked clip for upload in the browser ([986dce0](https://github.com/stacksjs/ts-videos/commit/986dce0)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🐛 Bug Fixes
+
+- **webm**: keep every block when tracks are read in turn ([49e83ff](https://github.com/stacksjs/ts-videos/commit/49e83ff)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **mp4**: write MP4s whose second track, rotation and AAC play ([c9cc614](https://github.com/stacksjs/ts-videos/commit/c9cc614)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **cli**: load the container readers so info, convert and extract can open files ([910ece2](https://github.com/stacksjs/ts-videos/commit/910ece2)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **mp4**: read 44.1 and 48 kHz audio sample rates as positive ([69fbdc3](https://github.com/stacksjs/ts-videos/commit/69fbdc3)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.1 ([7e74849](https://github.com/stacksjs/ts-videos/commit/7e74849)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.1.4...v0.2.0)
 
 ## 💥 Breaking Changes
