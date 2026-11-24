@@ -1,5 +1,24 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.1...v0.2.2)
+
+## 🚀 Features
+
+- **transcode**: refuse a clip too long for a size limit up front ([bdcc904](https://github.com/stacksjs/ts-videos/commit/bdcc904)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🐛 Bug Fixes
+
+- **config**: no top-level await, so a page bundle can hold a muxer ([857a3f6](https://github.com/stacksjs/ts-videos/commit/857a3f6)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **transcode**: the last frame lasts as long as the one before it ([f8b3b0a](https://github.com/stacksjs/ts-videos/commit/f8b3b0a)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.2 ([ce0aa5d](https://github.com/stacksjs/ts-videos/commit/ce0aa5d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.2.0...v0.2.1)
 
 ## 🚀 Features
