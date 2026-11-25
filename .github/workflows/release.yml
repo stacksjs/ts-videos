@@ -30,8 +30,9 @@ jobs:
       - name: Build packages
         run: bun run build
 
+      # 0.3.x is a maintenance line: publish it under its own tag so npm's latest stays on 0.4.
       - name: Publish to npm
-        run: pantry publish --npm --access public './packages/*' '.'
+        run: pantry publish --npm --access public --tag release-0.3 './packages/*' '.'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
