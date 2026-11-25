@@ -1,5 +1,23 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.3.1...v0.3.2)
+
+## 🚀 Features
+
+- **audio**: decode MP3 in TypeScript, no ffmpeg ([7c77742](https://github.com/stacksjs/ts-videos/commit/7c77742)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🤖 Continuous Integration
+
+- publish 0.3.x releases under the release-0.3 tag ([6694c9c](https://github.com/stacksjs/ts-videos/commit/6694c9c)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.3.2 ([72a13c7](https://github.com/stacksjs/ts-videos/commit/72a13c7)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-videos/compare/v0.3.0...v0.3.1)
 
 ## 🐛 Bug Fixes
